@@ -1,0 +1,105 @@
+/*
+ * i2c.h
+ *
+ *  Created on: Sep 28, 2016
+ *      Author: Meher
+ */
+
+#ifndef I2C_H_
+#define I2C_H_
+
+
+
+#include "main.h"
+
+
+// I2C Initialization Declaration //
+#define I2C1_LOCATION 		0
+#define I2C1_SCL_PORT		gpioPortC
+#define I2C1_SDA_PORT		gpioPortC
+#define I2C1_SCL_PIN		5
+#define I2C1_SDA_PIN		4
+#define I2C_GPIO_MODE		gpioModeWiredAnd
+#define I2C_CLOCK 			i2cClockHLRStandard
+
+
+
+// I2C Slave Declarations //
+#define I2C_SLAVE_ADDRESS				0x39
+#define WRITE_CONTROL					0x00
+#define WRITE_COMMAND_BYTE				((I2C_SLAVE_ADDRESS << 1) | WRITE_CONTROL)
+
+#define READ_CONTROL					0x01
+#define READ_CONTROL_BYTE				((I2C_SLAVE_ADDRESS << 1) | READ_CONTROL)
+
+#define COMMAND_REGISTER				0x08
+#define COMMAND_MASK					4
+
+#define CONTROL_REGISTER				0x00
+#define CONTROL_COMMAND					((COMMAND_REGISTER << COMMAND_MASK) |  CONTROL_REGISTER)
+#define CONTROL_DATA					0x03
+
+#define TIMING_REGISTER					0x01
+#define TIMING_COMMAND					((COMMAND_REGISTER << COMMAND_MASK) |  TIMING_REGISTER)
+#define TIMING_DATA						0x01
+
+#define THRESHOLD_LOW_REGISTER_LOW		0x02
+#define THRESHOLD_LOW_COMMAND_LOW		((COMMAND_REGISTER << COMMAND_MASK) |  THRESHOLD_LOW_REGISTER_LOW)
+#define THRESHOLD_LOW_DATA_LOW			0x0F
+
+#define THRESHOLD_LOW_REGISTER_HIGH		0x03
+#define THRESHOLD_LOW_COMMAND_HIGH		((COMMAND_REGISTER << COMMAND_MASK) |  THRESHOLD_LOW_REGISTER_HIGH)
+#define THRESHOLD_LOW_DATA_HIGH			0x00
+
+#define THRESHOLD_HIGH_REGISTER_LOW		0x04
+#define THRESHOLD_HIGH_COMMAND_LOW		((COMMAND_REGISTER << COMMAND_MASK) |  THRESHOLD_HIGH_REGISTER_LOW)
+#define THRESHOLD_HIGH_DATA_LOW			0x00
+
+#define THRESHOLD_HIGH_REGISTER_HIGH	0x05
+#define THRESHOLD_HIGH_COMMAND_HIGH		((COMMAND_REGISTER << COMMAND_MASK) |  THRESHOLD_HIGH_REGISTER_HIGH)
+#define THRESHOLD_HIGH_DATA_HIGH		0x08
+
+#define INTERRUPT_REGISTER				0x06
+#define INTERRUPT_COMMAND 				((COMMAND_REGISTER << COMMAND_MASK) |  INTERRUPT_REGISTER)
+#define INTERRUPT_DATA					0x14
+
+
+#define ADC0_LOW_REGISTER				0x0C
+#define ADC0_LOW_COMMAND				((COMMAND_REGISTER << COMMAND_MASK) |  ADC0_LOW_REGISTER)
+
+#define ADC0_HIGH_REGISTER				0x0D
+#define ADC0_HIGH_COMMAND				((COMMAND_REGISTER << COMMAND_MASK) |  ADC0_HIGH_REGISTER)
+
+
+#define TSL2561_LOW_THRESHOLD			0x000F
+#define TSL2561_HIGH_THRESHOLD			0x0800
+
+#define POWERDOWN_TSL2561				0x00
+#define INTERRUPT_RESET_TSL2561 		0xC0
+
+
+
+#define	I2C_BUFFER_SIZE					1
+#define I2C_DELAY						10000
+#define I2C_SHORT_DELAY					1000
+
+
+
+#define RESET_I2C_BUS()					do { \
+											if (I2C1->STATE & I2C_STATE_BUSY){ \
+					  	  	  	  	  	  	  I2C1->CMD = I2C_CMD_ABORT;} \
+											}while(0)
+
+
+void I2C_Initialize(void);
+void I2C_PIN_Initialize(void);
+void I2C_WriteByte(uint8_t,uint8_t);
+uint8_t I2C_ReadByte(uint8_t);
+void TL2561_init (void);
+void I2C_CommandWrite(uint8_t);
+void I2C_Start(void);
+
+
+
+
+#endif /* I2C_H_ */
