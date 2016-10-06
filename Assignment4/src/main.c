@@ -3,24 +3,32 @@
  * Name: Meher Jain
  * Email ID: meher.jain@colorado.edu
  * Date: 09/18/2016
- * Description: Assignment-3 ECEN 5023 */
+ * Description: Assignment-4 ECEN 5023 */
 
 
 /***************************************************Include Header Files ******************************/
 
 #include "sleep.h"
+#include "main.h"
 
 /********************************************Declaring the global constants ***************************/
 uint32_t ACMP_OUT             = 0;										// ACMP Output //
 uint32_t LETIMER_COMP0        = 0;										// LETIMERE_COMP0 Register Value */
 uint32_t count_value_EM2      = 0;										// COMP0 count value for EM2
 uint32_t count_value_EM3      = 0;										// COMP0 count value for EM3
+#if defined(INTERNAL_SENSOR_ON)
 uint32_t excite_flag 	      = 1;										// excite flag for ACMP excitation
+#endif
+#if !defined(INTERNAL_SENSOR_ON)
+uint8_t counter_flag		  = 0;
+#endif
 uint32_t Calibrated_ULFRCO    = 0;
 volatile int16_t BufferAdcData[ADC_SAMPLES];							// Global Variable for DMA to store data
 DMA_CB_TypeDef callback;												// DMA Callback Descriptors
 uint16_t adcCount_DMA_OFF	  = 1000;									// ADC Counts for Interrupt handler
 
+
+//uint8_t ack_count =0;
 
  // Initializing the structure for ACMP //
 ACMP_Init_TypeDef acmp_init =
@@ -37,9 +45,6 @@ ACMP_Init_TypeDef acmp_init =
 			VDD_LOW_REFERENCE,			 // Vdd reference scaling
 			true						 // Enable ACMP after Init
 	};
-
-
-
 
 
 
@@ -124,6 +129,42 @@ void transferComplete(unsigned int channel, bool primary, void *user)
 
 }
 
+/*
+ * GPIO Interrupt Handler
+ * Description: The routine clears the TSL2561 interrupt using I2C Bus and reads the value of TSL2561 ADC0 (2 byte) to decide on the 
+ * Light intesity and turn LED0 on and off as per the requirement.
+ * Args: None
+ * Return: None
+ */
+
+void  GPIO_ODD_IRQHandler(void)
+{
+	uint16_t sensor_value;
+	int i;
+	INT_Disable();																// Disable the interrupts//
+	GPIO_IntClear(GPIO_IntGet());												// Get and Clear the GPIO Interrupt
+	//for (i =0; i<1000;i++);
+
+
+	I2C_CommandWrite(INTERRUPT_RESET_TSL2561);									// Clear the TSL2561 Interrupt
+	sensor_value = I2C_ReadByte(ADC0_LOW_COMMAND);								// Read the ADC Value from the sensor (lower byte)
+	//for (i =0; i<I2C_DELAY;i++);												// Given some delay b/w to reads, Or else, TSL2561 /
+																				//	was not giving ACK for the code gets stuck in ACK polling //
+	sensor_value |= (I2C_ReadByte(ADC0_HIGH_COMMAND)<<8);						// Reading the higher byte
+	
+	/* LED Operation as per requirement */
+	if ((sensor_value < TSL2561_LOW_THRESHOLD) && (sensor_value > 0))			
+	{
+		GPIO_PinOutSet(LED,LED0);
+	}
+	else if (sensor_value > TSL2561_HIGH_THRESHOLD)
+	{
+		GPIO_PinOutClear(LED,LED0);
+	}
+
+	INT_Enable();																// Enable the interrupt
+}
+
 
 /*
  * Timer0 Interrupt Handler
@@ -175,7 +216,7 @@ void ADC0_IRQHandler(void){
 	}
 	else
 	{
-		adcCount_DMA_OFF = 1000;																	// Reinitialize the Count
+		adcCount_DMA_OFF = ADC_SAMPLES;																	// Reinitialize the Count
 		adcSample /=ADC_SAMPLES;																	// Take Average
 		averageTemp = convertToCelsius(adcSample);													// Convert to Celsius
 
@@ -213,10 +254,10 @@ void ADC0_IRQHandler(void){
 
 void LETIMER0_IRQHandler(void)
 {
-	int cnt_val = 0;
+	uint8_t	i2c_read_val = 0;
 	INT_Disable();
 
-
+#if defined(INTERNAL_SENSOR_ON)
 	ACMP_OUT = ((ACMP0->STATUS & ACMP_STATUS_ACMPOUT) >> _ACMP_STATUS_ACMPOUT_SHIFT);					// Checking the ACMPOUT Value
 	//LETIMER_IntClear(LETIMER0, LETIMER_IEN_COMP0);
 	LETIMER0->IFC = LETIMER_IEN_COMP0;																	// Clear the interrupt flag for COMP0
@@ -244,7 +285,9 @@ void LETIMER0_IRQHandler(void)
 		if (excite_flag)																				// If 4ms interrupt
 		{
 			excite_flag --;
+
 			GPIO_PinOutSet(ACMP_EXCITE_PORT,6);															// Excite the ACMP
+
 			LETIMER0->CNT = 0;																			// Reinitialize the LETIME CNT
 			//LETIMER_CompareSet(LETIMER0,0,(LETIMER_MAX_COUNT-(int)(EXCITE_PERIOD*ULFRCO_FREQ)));
 			cnt_val = (int)(EXCITE_PERIOD * Calibrated_ULFRCO);
@@ -254,6 +297,7 @@ void LETIMER0_IRQHandler(void)
 		else
 		{
 			excite_flag ++;
+
 			GPIO_PinOutClear(ACMP_EXCITE_PORT,6);														// Turn Off the ACMP excite channel
 			LETIMER0->CNT = 0;
 			//LETIMER_CompareSet(LETIMER0,0,count_value_EM3);
@@ -273,13 +317,89 @@ void LETIMER0_IRQHandler(void)
 	{
 		GPIO_PinOutSet(LED,LED0);																	// Exciting the ACMP channel
 		//ACMP0->INPUTSEL |= 0x00003D00;
-		acmp_init.vddLevel = VDD_HIGH_REFERENCE;														// Changing the reference
-		ACMP_Init(ACMP0,&acmp_init);																	// Reinitialize the ACMP
-		ACMP_ChannelSet(ACMP0,ACMP_NEGATIVE_CHANNEL,ACMP_POSITIVE_CHANNEL);								// Reset the channel
+		acmp_init.vddLevel = VDD_HIGH_REFERENCE;													// Changing the reference
+		ACMP_Init(ACMP0,&acmp_init);																// Reinitialize the ACMP
+		ACMP_ChannelSet(ACMP0,ACMP_NEGATIVE_CHANNEL,ACMP_POSITIVE_CHANNEL);							// Reset the channel
+	}
+#else
+
+	LETIMER0->IFC = LETIMER_IEN_COMP0;																// Clear the interrupt flag for COMP0
+
+	if (EnergyMode == EM2)
+	{
+		LETIMER0->CNT = 0;																			// Reinitialize the LETIME CNT
+		LETIMER0->COMP0 = count_value_EM2;															// Reload the new value on COMP0
+		if (counter_flag == 0)
+		{
+			GPIO_PinOutSet(LPM_GPIO_Port,LPM_GPIO_Pin);												// Load Power Management using GPIO
+			for (int i=0;i<I2C_SHORT_DELAY;i++);																// Some delay b/w starting I2C Communication and powerup the device
+			TL2561_init();																			// Sending Initialize sequence to TL2561
+			NVIC_EnableIRQ(GPIO_ODD_IRQn);															// Enable the GPIO Interrupt
+			GPIO_PinOutSet(GPIO_INT_PORT,GPIO_INT_PIN);												// Enable the GPIO Interrupt
+			//GPIO_PinOutToggle(LED,LED1);
+
+			counter_flag ++;																		// Increment the counter_flag
+		}
+
+		else if (counter_flag == 1)
+		{
+
+			/* Monitor the TSL2561 Interrupt*/
+			counter_flag ++;
+		}
+
+		else if (counter_flag == 2)
+		{
+			NVIC_DisableIRQ(GPIO_ODD_IRQn);															// Disable the GPIO Interrupt
+			I2C_WriteByte(CONTROL_COMMAND,POWERDOWN_TSL2561);										// Send Power Down Sequence to TSL2561
+			GPIO_PinOutClear(LPM_GPIO_Port,LPM_GPIO_Pin);											// Turn of the GPIO Pin
+			GPIO_PinOutClear(GPIO_INT_PORT,GPIO_INT_PIN);											// Turn of the GPIO Interrupt/
+			//GPIO_PinOutToggle(LED,LED1);
+			counter_flag = 0;																		// Reset the counter flag
+		}
 	}
 
+	else if (EnergyMode == EM3)
+	{
+		/* Same set of steps are followed in EM3 */
+		LETIMER0->CNT = 0;
+		LETIMER0->COMP0 = count_value_EM3;										// Reload the new value on COMP0
+		if (counter_flag == 0)
+		{
+			/* Power On the TSL2561 Sensor in correct Sequence and enable the GPIO Interrupts*/
+			GPIO_PinOutSet(LPM_GPIO_Port,LPM_GPIO_Pin);
+			for (int i=0;i<I2C_SHORT_DELAY;i++);
+			TL2561_init();
+			NVIC_EnableIRQ(GPIO_ODD_IRQn);
+			GPIO_PinOutSet(GPIO_INT_PORT,GPIO_INT_PIN);
+			counter_flag ++;
+		}
 
+		else if (counter_flag == 1)
+		{
+
+		/* Monitor the TSL2561 Interrupt */
+			counter_flag ++;
+		}
+
+		else if (counter_flag == 2)
+		{
+			/* Power OFF the TSL2561 Sensor in correct Sequence and disable the GPIO interrupts*/
+			NVIC_DisableIRQ(GPIO_ODD_IRQn);
+			I2C_WriteByte(CONTROL_COMMAND,POWERDOWN_TSL2561);
+			GPIO_PinOutClear(LPM_GPIO_Port,LPM_GPIO_Pin);
+			GPIO_PinOutClear(GPIO_INT_PORT,GPIO_INT_PIN);
+			counter_flag = 0;
+		}
+	}
+
+#endif
+
+#if defined (INTERNAL_SENSOR_ON)
 	if(excite_flag)																					// If 4sec interrupt
+#else
+	if(counter_flag>=0)
+#endif
 	{
 		blockSleepMode(EM1);																		// Block EM1 so that ADC can work
 #if defined(DMA_ON)																					// If using DMA
@@ -348,7 +468,7 @@ void letimer_initialize(sleepstate_enum EMx)
 	//LETIMER_IntEnable(LETIMER0,LETIMER_IF_COMP1);
 	if (EMx == EM2)
 	{
-		CMU->LFAPRESC0 |= CMU_LFAPRESC0_LETIMER0_DIV2; 						// Setting the prescalar such that LFXO frequency becomes half
+		CMU->LFAPRESC0 |= CMU_LFAPRESC0_LETIMER0_DIV4; 						// Setting the prescalar such that LFXO frequency becomes half
 		count_value_EM2 = TIMER_PERIOD*LFXO_FREQ_PRESCALAR/1000;
 		count_value_EM2 = LETIMER_MAX_COUNT - count_value_EM2;				// Calculate the COMP0 value based on given timeperiod
 		LETIMER_CompareSet(LETIMER0,0,count_value_EM2);						// Set the value for COMP0
@@ -407,7 +527,17 @@ void GPIO_init(void)
 	GPIO_PinModeSet(LED,LED1,gpioModePushPull,0);					    // Set the GPIO PIN for the LED 1
 	GPIO_PinModeSet(ACMP_EXCITE_PORT,6,gpioModePushPull,0);				// Set the ACMP Excite GPIO
 	GPIO_PinModeSet(ACMP_SENSE_PORT,6,gpioModeDisabled,0);				// Disable the ACMP sense from PushPull Mode//
+
+	GPIO_PinModeSet(LPM_GPIO_Port,LPM_GPIO_Pin,gpioModePushPull,0);
+	GPIO_DriveModeSet(LPM_GPIO_Port,gpioDriveModeStandard);
+
+	GPIO_PinModeSet(GPIO_INT_PORT,GPIO_INT_PIN,gpioModeInput,0);
+
+	GPIO_IntConfig(GPIO_INT_PORT,GPIO_INT_PIN,false,true,true);
+
+
 }
+
 
 
 /*
@@ -558,7 +688,7 @@ void adcConfig()
 		.ovsRateSel	 	= 0,											// No Oversampling
 		.prescale       = prescale10ksps,								// 107 prescalar
 		.tailgate       = false,										// No Tail-gating
-		.warmUpMode     = adcWarmupNormal,								// Don't warm up ADC b/w conversions
+		.warmUpMode     = ADC_WARMUP,									// Don't warm up ADC b/w conversions
 		.timebase       = _ADC_CTRL_TIMEBASE_DEFAULT					// Default time base for timing of ADC
 	};
 
@@ -566,15 +696,15 @@ void adcConfig()
 
 	ADC_InitSingle_TypeDef  adcInitSingle =								// Initialize the ADC single covnersion structure
 	{
-		.acqTime 		= adcAcqTime1,									// 1 ADC cycle acquisiton time
+		.acqTime 		= ADC_ACQUSITION_TIME,							// 1 ADC cycle acquisiton time
 		.diff			= false,										// No differential mode
 		.input 			= ADC_TEMP_CHANNEL,								// Temperature sensor input channel
 		.leftAdjust	 	= false,										// No left Adjustment
 		.prsEnable 		= false,										// PRS channel trigger disabled
 		.prsSel 		= adcPRSSELCh0,									// Set PRS Channel 0 to use (Disabled)
-		.reference 		= adcRef1V25,									// 1.25 V as reference channel
+		.reference 		= ADC_REFERENCE_LEVEL,							// 1.25 V as reference channel
 		.rep			= true,											// rep mode true
-		.resolution 	= adcRes12Bit									// 12bit Resolution
+		.resolution 	= ADC_RESOLUTION								// 12bit Resolution
 	};
 
 	ADC_InitSingle(ADC0,&adcInitSingle);								// Initialize the structure
@@ -623,8 +753,6 @@ void dmaConfig(void)
 	descrCfg.size        = dmaDataSize2;											// 2 bytes of data transfer
 	descrCfg.hprot		 = 0;
 	DMA_CfgDescr(DMA_CHANNEL_ADC, true, &descrCfg);									// Configuration of DMA
-
-
 }
 
 
@@ -639,15 +767,20 @@ int main(void)
 
   CHIP_Init();
   blockSleepMode(EM3);												// Block EM4, so that processor never goes below EM3
+  //clock_init(EnergyMode);							 				// Initializing the Oscillators and Clock trees
+
 #if defined(CALIBRATION)											// If calibration on
   LETIMER_Calibration();											// Calibrate the ULFRCO
 #endif
   GPIO_init();														// Configuring the GPIO Pins
+  I2C_Initialize();													// Initialize the I2C1
   adcConfig();														// Configuring the ADC
 #if defined(DMA_ON)													// If DMA is used
   dmaConfig();														// Configuring the DMA
 #endif
+#if defined(INTERNAL_SENSOR_ON)
   ACMPInit(EnergyMode);												// Initializing the ACMP
+#endif
   clock_init(EnergyMode);							 				// Initializing the Oscillators and Clock trees
   letimer_initialize(EnergyMode);									// Initializing the LETIMER0
 

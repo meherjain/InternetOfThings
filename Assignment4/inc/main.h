@@ -23,14 +23,16 @@
 #include "em_adc.h"
 #include "em_dma.h"
 #include "dmactrl.h"
+#include "em_i2c.h"
+#include "i2c.h"
 
 
 
 // Defining the constants
 #define LFXO_FREQ 	       			32768	    // 32.768KHz
-#define LFXO_FREQ_PRESCALAR 		16384		// 16.384KHz
+#define LFXO_FREQ_PRESCALAR 		8192		// 8.192KHz
 #define ULFRCO_FREQ        			1000	    // 1KHz
-#define TIMER_PERIOD				3996        // 4seconds
+#define TIMER_PERIOD				4996        // 4seconds
 #define CALIBRATION_COUNT_ULFRCO	1000 		// 1seconds
 #define CALIBRATION_COUNT_LFXO		32768		// 1seconds
 #define EXCITE_PERIOD				0.004		// 4ms
@@ -41,12 +43,16 @@
 
 
 //ADC Definition //
-#define ADC_SAMPLES					1000						// Converting 1000 samples per ADC trigger//
-#define ADC_SAMPLES_SEC				10000						// ADC running at 10ksps
+#define ADC_SAMPLES					400							// Converting 400 samples per ADC trigger//
+#define ADC_SAMPLES_SEC				75000						// ADC running at 75ksps
 #define ADC_TEMP_CHANNEL			adcSingleInputTemp			// Using Temperature sensor as ADC input channel
 #define ADC_SINGLE_CONVERSION       adcStartSingle
-#define prescale10ksps				107							//Tksps = (Ta + N)*OSR, TA = Acquisition Time, N= ADC_Bits, OSR = OverSamplingRatio
-																// To get the 10ksps, acquisition time of 8 ADC_Clock Cycles is used*/
+#define ADC_RESOLUTION 				adcRes12Bit
+#define ADC_ACQUSITION_TIME			adcAcqTime2
+#define ADC_WARMUP					adcWarmupNormal
+#define ADC_REFERENCE_LEVEL			adcRef1V25
+#define prescale10ksps				12							//Tksps = (Ta + N)*OSR, TA = Acquisition Time, N= ADC_Bits, OSR = OverSamplingRatio
+																// To get the 75ksps, acquisition time of 8 ADC_Clock Cycles is used*/
 
 // Temperature Definition
 #define MAX_TEMP_LIMIT				35							// Maximum Temperature Limit
@@ -59,6 +65,13 @@
 // DMA Definition //
 #define DMA_CHANNEL_ADC				0							// Using DMA channel 0 for ADC transfer
 
+// Load Power Management Pin
+#define LPM_GPIO_Port				gpioPortD
+#define LPM_GPIO_Pin				0
+
+// GPIO Interrupt Pins
+#define GPIO_INT_PORT				gpioPortD
+#define GPIO_INT_PIN				1
 
 // LED Channel Definition//
 #define LED							gpioPortE					// LED port
@@ -71,6 +84,13 @@
 #define ACMP_NEGATIVE_CHANNEL		acmpChannelVDD		// VDD Reference
 #define ACMP_EXCITE_PORT			gpioPortD			// Excite Port
 #define ACMP_SENSE_PORT				gpioPortC			// Sense Port
+
+
+#define INTERNAL_LIGHT_SENSOR 0
+
+#if (INTERNAL_LIGHT_SENSOR ==1)
+#define INTERNAL_SENSOR_ON
+#endif
 
 // User can define the ULFRCO Calibration Routine should be ran or not // 1 - CALIBRATION ON, 0- CALIBRATION OFF
 #define ULFRCO_CALIBRATION	1
@@ -117,6 +137,7 @@ void adcConfig(void);
 void dmaConfig(void);
 float convertToCelsius(int32_t);
 void ADC0_IRQHandler(void);
+
 
 
 

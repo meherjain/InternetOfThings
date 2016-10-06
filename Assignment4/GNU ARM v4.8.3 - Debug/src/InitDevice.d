@@ -1,5 +1,5 @@
 src/InitDevice.o: ../src/InitDevice.c \
- C:/Users/Meher/SimplicityStudio/v3_workspace/Assignmet3/inc/InitDevice.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/InitDevice.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_system.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/em_device.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/efm32lg990f256.h \
@@ -64,7 +64,7 @@ src/InitDevice.o: ../src/InitDevice.c \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_gpio.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_gpio.h
 
-C:/Users/Meher/SimplicityStudio/v3_workspace/Assignmet3/inc/InitDevice.h:
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/InitDevice.h:
 
 C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_system.h:
 

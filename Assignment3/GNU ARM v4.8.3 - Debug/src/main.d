@@ -1,6 +1,6 @@
 src/main.o: ../src/main.c \
- C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/sleep.h \
- C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/main.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignmet3/inc/sleep.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignmet3/inc/main.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/em_device.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/efm32lg990f256.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/CMSIS/Include/core_cm3.h \
@@ -69,14 +69,11 @@ src/main.o: ../src/main.c \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_timer.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_adc.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_dma.h \
- C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/drivers/dmactrl.h \
- C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_i2c.h \
- C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/i2c.h \
- C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/main.h
+ C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/drivers/dmactrl.h
 
-C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/sleep.h:
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignmet3/inc/sleep.h:
 
-C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/main.h:
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignmet3/inc/main.h:
 
 C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/em_device.h:
 
@@ -215,9 +212,3 @@ C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_adc.h:
 C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_dma.h:
 
 C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/drivers/dmactrl.h:
-
-C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_i2c.h:
-
-C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/i2c.h:
-
-C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment4/inc/main.h:
