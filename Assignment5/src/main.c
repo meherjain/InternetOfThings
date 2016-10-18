@@ -440,14 +440,16 @@ void clock_init(sleepstate_enum EMx)
 	{
 		CMU_OscillatorEnable(cmuOsc_LFXO,true,true);										// Enable the LFXO oscillator for EM2
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_LFXO);									// Selecting the LFA clock tree
+		CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);									// Selecting the LFB clock tree
 	}
 	else if (EMx == EM3)																	// Check the current energy mode
 	{
 		CMU_OscillatorEnable(cmuOsc_ULFRCO,true,true);										// Enable the ULFRCO for EM3
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_ULFRCO);									// Selecting the LFA clock tree
 	}
-	CMU_ClockEnable(cmuClock_HFPER,true);									//Enabling the High Frequency peripheral
+	CMU_ClockEnable(cmuClock_HFPER,true);													//Enabling the High Frequency peripheral
 	CMU_ClockEnable(cmuClock_CORELE,true);													// Enable the CORELE
+	CMU_ClockEnable(cmuClock_LFB, true);
 }
 
 /*
@@ -691,7 +693,7 @@ void adcConfig()
 	{
 		.lpfMode 		= adcLPFilterBypass,							// No filter
 		.ovsRateSel	 	= 0,											// No Oversampling
-		.prescale       = prescale10ksps,								// 107 prescalar
+		.prescale       = prescale100ksps,								// 107 prescalar
 		.tailgate       = false,										// No Tail-gating
 		.warmUpMode     = ADC_WARMUP,									// Don't warm up ADC b/w conversions
 		.timebase       = _ADC_CTRL_TIMEBASE_DEFAULT					// Default time base for timing of ADC

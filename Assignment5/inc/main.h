@@ -32,7 +32,7 @@
 #define LFXO_FREQ 	       			32768	    // 32.768KHz
 #define LFXO_FREQ_PRESCALAR 		8192		// 8.192KHz
 #define ULFRCO_FREQ        			1000	    // 1KHz
-#define TIMER_PERIOD				4996        // 4seconds
+#define TIMER_PERIOD				6250        // 6.25seconds
 #define CALIBRATION_COUNT_ULFRCO	1000 		// 1seconds
 #define CALIBRATION_COUNT_LFXO		32768		// 1seconds
 #define EXCITE_PERIOD				0.004		// 4ms
@@ -43,15 +43,15 @@
 
 
 //ADC Definition //
-#define ADC_SAMPLES					400							// Converting 400 samples per ADC trigger//
-#define ADC_SAMPLES_SEC				75000						// ADC running at 75ksps
+#define ADC_SAMPLES					500							// Converting 400 samples per ADC trigger//
+#define ADC_SAMPLES_SEC				100000						// ADC running at 100ksps
 #define ADC_TEMP_CHANNEL			adcSingleInputTemp			// Using Temperature sensor as ADC input channel
 #define ADC_SINGLE_CONVERSION       adcStartSingle
 #define ADC_RESOLUTION 				adcRes12Bit
 #define ADC_ACQUSITION_TIME			adcAcqTime2
 #define ADC_WARMUP					adcWarmupNormal
 #define ADC_REFERENCE_LEVEL			adcRef1V25
-#define prescale10ksps				12							//Tksps = (Ta + N)*OSR, TA = Acquisition Time, N= ADC_Bits, OSR = OverSamplingRatio
+#define prescale100ksps				10							//Tksps = (Ta + N)*OSR, TA = Acquisition Time, N= ADC_Bits, OSR = OverSamplingRatio
 																// To get the 75ksps, acquisition time of 8 ADC_Clock Cycles is used*/
 
 // Temperature Definition
@@ -100,7 +100,7 @@
 #endif
 
 // User can select the energy mode by changing to EM0,EM1,EM2,EM3
-#define EnergyMode     EM3
+#define EnergyMode     EM2
 
 
 // User can choose to use DMA
