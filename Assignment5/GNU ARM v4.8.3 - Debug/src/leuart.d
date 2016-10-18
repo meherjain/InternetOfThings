@@ -1,5 +1,5 @@
-src/i2c.o: ../src/i2c.c \
- H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/i2c.h \
+src/leuart.o: ../src/leuart.c \
+ H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/leuart.h \
  H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/main.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/em_device.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/efm32lg990f256.h \
@@ -75,7 +75,7 @@ src/i2c.o: ../src/i2c.c \
  H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/i2c.h \
  H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/leuart.h
 
-H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/i2c.h:
+H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/leuart.h:
 
 H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/main.h:
 

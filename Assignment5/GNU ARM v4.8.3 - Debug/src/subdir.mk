@@ -7,6 +7,7 @@ C_SRCS += \
 ../src/InitDevice.c \
 ../src/dmactrl.c \
 ../src/i2c.c \
+../src/leuart.c \
 ../src/main.c \
 ../src/sleep.c 
 
@@ -14,6 +15,7 @@ OBJS += \
 ./src/InitDevice.o \
 ./src/dmactrl.o \
 ./src/i2c.o \
+./src/leuart.o \
 ./src/main.o \
 ./src/sleep.o 
 
@@ -21,6 +23,7 @@ C_DEPS += \
 ./src/InitDevice.d \
 ./src/dmactrl.d \
 ./src/i2c.d \
+./src/leuart.d \
 ./src/main.d \
 ./src/sleep.d 
 
@@ -44,6 +47,13 @@ src/i2c.o: ../src/i2c.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GNU ARM C Compiler'
 	arm-none-eabi-gcc -g -gdwarf-2 -mcpu=cortex-m3 -mthumb '-DEFM32LG990F256=1' -I"H:/Fall2016/IOT/InternetOfThings/Assignment5/inc" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/drivers" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/EFM32LG_STK3600/config" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/bsp" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/CMSIS/Include" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include" -O0 -Wall -c -fmessage-length=0 -mno-sched-prolog -fno-builtin -ffunction-sections -fdata-sections -std=c99 -MMD -MP -MF"src/i2c.d" -MT"src/i2c.o" -o "$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+src/leuart.o: ../src/leuart.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GNU ARM C Compiler'
+	arm-none-eabi-gcc -g -gdwarf-2 -mcpu=cortex-m3 -mthumb '-DEFM32LG990F256=1' -I"H:/Fall2016/IOT/InternetOfThings/Assignment5/inc" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/drivers" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/EFM32LG_STK3600/config" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/bsp" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/CMSIS/Include" -I"C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include" -O0 -Wall -c -fmessage-length=0 -mno-sched-prolog -fno-builtin -ffunction-sections -fdata-sections -std=c99 -MMD -MP -MF"src/leuart.d" -MT"src/leuart.o" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

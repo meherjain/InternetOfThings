@@ -441,6 +441,8 @@ void clock_init(sleepstate_enum EMx)
 		CMU_OscillatorEnable(cmuOsc_LFXO,true,true);										// Enable the LFXO oscillator for EM2
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_LFXO);									// Selecting the LFA clock tree
 		CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);									// Selecting the LFB clock tree
+		CMU_ClockEnable(cmuClock_LFB, true);
+
 	}
 	else if (EMx == EM3)																	// Check the current energy mode
 	{
@@ -449,7 +451,7 @@ void clock_init(sleepstate_enum EMx)
 	}
 	CMU_ClockEnable(cmuClock_HFPER,true);													//Enabling the High Frequency peripheral
 	CMU_ClockEnable(cmuClock_CORELE,true);													// Enable the CORELE
-	CMU_ClockEnable(cmuClock_LFB, true);
+
 }
 
 /*
@@ -762,9 +764,6 @@ void dmaConfig(void)
 	DMA_CfgDescr(DMA_CHANNEL_ADC, true, &descrCfg);									// Configuration of DMA
 }
 
-
-
-
 /**************************************************************************//**
  * @brief  Main function
  *****************************************************************************/
@@ -774,13 +773,13 @@ int main(void)
 
   CHIP_Init();
   blockSleepMode(EM3);												// Block EM4, so that processor never goes below EM3
-  //clock_init(EnergyMode);							 				// Initializing the Oscillators and Clock trees
-
 #if defined(CALIBRATION)											// If calibration on
   LETIMER_Calibration();											// Calibrate the ULFRCO
 #endif
+  clock_init(EnergyMode);							 				// Initializing the Oscillators and Clock trees
   GPIO_init();														// Configuring the GPIO Pins
   I2C_Initialize();													// Initialize the I2C1
+  leuart_initialize();
   adcConfig();														// Configuring the ADC
 #if defined(DMA_ON)													// If DMA is used
   dmaConfig();														// Configuring the DMA
@@ -788,7 +787,7 @@ int main(void)
 #if defined(INTERNAL_SENSOR_ON)
   ACMPInit(EnergyMode);												// Initializing the ACMP
 #endif
-  clock_init(EnergyMode);							 				// Initializing the Oscillators and Clock trees
+  //clock_init(EnergyMode);							 				// Initializing the Oscillators and Clock trees
   letimer_initialize(EnergyMode);									// Initializing the LETIMER0
 
 
