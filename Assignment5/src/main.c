@@ -25,7 +25,7 @@ uint8_t counter_flag		  = 0;
 uint32_t Calibrated_ULFRCO    = 0;
 volatile int16_t BufferAdcData[ADC_SAMPLES];							// Global Variable for DMA to store data
 DMA_CB_TypeDef callback;												// DMA Callback Descriptors
-uint16_t adcCount_DMA_OFF	  = 1000;									// ADC Counts for Interrupt handler
+uint16_t adcCount_DMA_OFF	  = 500;									// ADC Counts for Interrupt handler
 
 
 //uint8_t ack_count =0;
@@ -156,10 +156,12 @@ void  GPIO_ODD_IRQHandler(void)
 	if ((sensor_value < TSL2561_LOW_THRESHOLD) && (sensor_value > 0))			
 	{
 		GPIO_PinOutSet(LED,LED0);
+		leuart_tx(LED_ON);
 	}
 	else if (sensor_value > TSL2561_HIGH_THRESHOLD)
 	{
 		GPIO_PinOutClear(LED,LED0);
+		leuart_tx(LED_OFF);
 	}
 
 	INT_Enable();																// Enable the interrupt

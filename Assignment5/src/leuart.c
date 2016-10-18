@@ -9,6 +9,16 @@
 #include "leuart.h"
 
 
+void LEUART0_IRQHandler(void)
+{
+	uint32_t int_flag = LEUART_IntGet(LEUART0);
+	LEUART_IntClear(LEUART0,int_flag);
+
+}
+
+
+
+
 void leuart_pin_initialize(void)
 {
 	GPIO_PinModeSet(LEUART_TX_PORT, LEUART_TX_PIN, LEUART_GPIO_Tx_MODE, 1);			// Tx
@@ -34,6 +44,9 @@ void leuart_initialize(void)
 	leuart_pin_initialize();
 	LEUART0->CTRL |= LEUART_CTRL_LOOPBK;
 	//LEUART_Enable(LEUART0,LEUART_ENABLE_RxTx);
+	LEUART0->IEN   = LEUART_IEN_RXDATAV;
+	NVIC_ClearPendingIRQ(LEUART0_IRQn);
+	NVIC_EnableIRQ(LEUART0_IRQn);
 	leuart_tx(0xAA);
 
 }
@@ -42,10 +55,13 @@ void leuart_initialize(void)
 void leuart_tx(uint8_t data)
 {
 	LEUART0->TXDATA	= data;
+	while (!(LEUART0->IF & LEUART_IF_TXC));
+
 }
 
 uint8_t leuart_rx(void)
 {
 	uint8_t data;
+	//data =
 	return data;
 }

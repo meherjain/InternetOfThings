@@ -80,6 +80,9 @@
 #define LED0						2							// LED 0 Number
 #define LED1						3							// LED 1 Number
 
+// LED Status sent to SAMB11
+#define LED_ON						0x01
+#define LED_OFF						0x00
 
 // ACMP Channel Definition //
 #define ACMP_POSITIVE_CHANNEL		acmpChannel6		// Channel 6 of ACMP
