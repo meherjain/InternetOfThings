@@ -26,7 +26,7 @@ uint32_t Calibrated_ULFRCO    = 0;
 volatile int16_t BufferAdcData[ADC_SAMPLES];							// Global Variable for DMA to store data
 DMA_CB_TypeDef callback;												// DMA Callback Descriptors
 uint16_t adcCount_DMA_OFF	  = 500;									// ADC Counts for Interrupt handler
-
+extern uint32_t leuart_rx_data;
 
 //uint8_t ack_count =0;
 
