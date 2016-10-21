@@ -22,11 +22,12 @@
 #include "em_timer.h"
 #include "em_adc.h"
 #include "em_dma.h"
+#include "em_leuart.h"
 #include "dmactrl.h"
 #include "em_i2c.h"
-#include "em_leuart.h"
 #include "i2c.h"
 #include "leuart.h"
+
 
 
 
@@ -46,14 +47,14 @@
 
 //ADC Definition //
 #define ADC_SAMPLES					500							// Converting 400 samples per ADC trigger//
-#define ADC_SAMPLES_SEC				100000						// ADC running at 100ksps
+#define ADC_SAMPLES_SEC				100000						// ADC running at 75ksps
 #define ADC_TEMP_CHANNEL			adcSingleInputTemp			// Using Temperature sensor as ADC input channel
 #define ADC_SINGLE_CONVERSION       adcStartSingle
 #define ADC_RESOLUTION 				adcRes12Bit
 #define ADC_ACQUSITION_TIME			adcAcqTime2
 #define ADC_WARMUP					adcWarmupNormal
 #define ADC_REFERENCE_LEVEL			adcRef1V25
-#define prescale100ksps				10							//Tksps = (Ta + N)*OSR, TA = Acquisition Time, N= ADC_Bits, OSR = OverSamplingRatio
+#define prescale10ksps				10							//Tksps = (Ta + N)*OSR, TA = Acquisition Time, N= ADC_Bits, OSR = OverSamplingRatio
 																// To get the 75ksps, acquisition time of 8 ADC_Clock Cycles is used*/
 
 // Temperature Definition
@@ -80,9 +81,6 @@
 #define LED0						2							// LED 0 Number
 #define LED1						3							// LED 1 Number
 
-// LED Status sent to SAMB11
-#define LED_ON						0x01
-#define LED_OFF						0x00
 
 // ACMP Channel Definition //
 #define ACMP_POSITIVE_CHANNEL		acmpChannel6		// Channel 6 of ACMP

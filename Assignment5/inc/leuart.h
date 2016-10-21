@@ -29,7 +29,7 @@
 
 void leuart_pin_initialize(void);
 void leuart_initialize(void);
-void leuart_tx (uint8_t);
+void leuart_tx (uint8_t*);
 uint8_t leuart_rx(void);
 
 #endif /* LEUART_H_ */

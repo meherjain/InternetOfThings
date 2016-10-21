@@ -25,8 +25,8 @@ uint8_t counter_flag		  = 0;
 uint32_t Calibrated_ULFRCO    = 0;
 volatile int16_t BufferAdcData[ADC_SAMPLES];							// Global Variable for DMA to store data
 DMA_CB_TypeDef callback;												// DMA Callback Descriptors
-uint16_t adcCount_DMA_OFF	  = 500;									// ADC Counts for Interrupt handler
-extern uint32_t leuart_rx_data;
+uint16_t adcCount_DMA_OFF	  = ADC_SAMPLES;									// ADC Counts for Interrupt handler
+//extern leuart_buffer[6] = {0};
 
 //uint8_t ack_count =0;
 
@@ -105,6 +105,8 @@ float convertToCelsius(int32_t adcSample)
 void transferComplete(unsigned int channel, bool primary, void *user)
 {
 	uint32_t averageSample = 0;
+	uint8_t LED_OFF[] = "LEDOFF" ;
+	uint8_t LED_ON[]  = "_LEDON" ;
 	float averageTemp = 0.0;
 	int i =0;
 	ADC0->CMD |= ADC_CMD_SINGLESTOP;															// Stopping the ADC
@@ -120,11 +122,13 @@ void transferComplete(unsigned int channel, bool primary, void *user)
 	if((averageTemp >= MIN_TEMP_LIMIT) && (averageTemp<=MAX_TEMP_LIMIT))						// Checking the Temp Range
 	{
 		GPIO_PinOutClear(LED,LED1);																// LED OFF if inside the range
+		//leuart_tx(LED_OFF);
 	}
 
 	else if(averageTemp < MIN_TEMP_LIMIT || (averageTemp>=MAX_TEMP_LIMIT))
 	{
 		GPIO_PinOutSet(LED,LED1);																// LED ON if outside the range
+		//leuart_tx(LED_ON);
 	}
 
 }
@@ -156,12 +160,13 @@ void  GPIO_ODD_IRQHandler(void)
 	if ((sensor_value < TSL2561_LOW_THRESHOLD) && (sensor_value > 0))			
 	{
 		GPIO_PinOutSet(LED,LED0);
-		leuart_tx(LED_ON);
+		leuart_tx("_LEDON");
+
 	}
 	else if (sensor_value > TSL2561_HIGH_THRESHOLD)
 	{
 		GPIO_PinOutClear(LED,LED0);
-		leuart_tx(LED_OFF);
+		leuart_tx("LEDOFF");
 	}
 
 	INT_Enable();																// Enable the interrupt
@@ -444,16 +449,14 @@ void clock_init(sleepstate_enum EMx)
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_LFXO);									// Selecting the LFA clock tree
 		CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);									// Selecting the LFB clock tree
 		CMU_ClockEnable(cmuClock_LFB, true);
-
 	}
 	else if (EMx == EM3)																	// Check the current energy mode
 	{
 		CMU_OscillatorEnable(cmuOsc_ULFRCO,true,true);										// Enable the ULFRCO for EM3
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_ULFRCO);									// Selecting the LFA clock tree
 	}
-	CMU_ClockEnable(cmuClock_HFPER,true);													//Enabling the High Frequency peripheral
+	CMU_ClockEnable(cmuClock_HFPER,true);									//Enabling the High Frequency peripheral
 	CMU_ClockEnable(cmuClock_CORELE,true);													// Enable the CORELE
-
 }
 
 /*
@@ -697,7 +700,7 @@ void adcConfig()
 	{
 		.lpfMode 		= adcLPFilterBypass,							// No filter
 		.ovsRateSel	 	= 0,											// No Oversampling
-		.prescale       = prescale100ksps,								// 107 prescalar
+		.prescale       = prescale10ksps,								// 107 prescalar
 		.tailgate       = false,										// No Tail-gating
 		.warmUpMode     = ADC_WARMUP,									// Don't warm up ADC b/w conversions
 		.timebase       = _ADC_CTRL_TIMEBASE_DEFAULT					// Default time base for timing of ADC
@@ -766,6 +769,9 @@ void dmaConfig(void)
 	DMA_CfgDescr(DMA_CHANNEL_ADC, true, &descrCfg);									// Configuration of DMA
 }
 
+
+
+
 /**************************************************************************//**
  * @brief  Main function
  *****************************************************************************/
@@ -781,7 +787,7 @@ int main(void)
   clock_init(EnergyMode);							 				// Initializing the Oscillators and Clock trees
   GPIO_init();														// Configuring the GPIO Pins
   I2C_Initialize();													// Initialize the I2C1
-  leuart_initialize();
+  leuart_initialize();												// Initialize the LEUART0
   adcConfig();														// Configuring the ADC
 #if defined(DMA_ON)													// If DMA is used
   dmaConfig();														// Configuring the DMA

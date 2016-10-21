@@ -8,15 +8,17 @@
 
 #include "leuart.h"
 
-static uint32_t leuart_rx_data[8] = {0};
-static uint32_t jk;
+static uint8_t leuart_rx_data[6] = {0};
+static uint8_t jk;
 
 void LEUART0_IRQHandler(void)
 {
+	INT_Disable();
 	uint32_t int_flag = LEUART_IntGet(LEUART0);
 	LEUART_IntClear(LEUART0,int_flag);
 	leuart_rx_data[jk] = LEUART0->RXDATA;
 	jk++;
+	INT_Enable();
 }
 
 
@@ -30,7 +32,8 @@ void leuart_pin_initialize(void)
 
 void leuart_initialize(void)
 {
-	int i =0;
+	//int i =0;
+
 	CMU_ClockEnable(cmuClock_LEUART0, true);						// Enabling Clock for I2C1
 	LEUART_Reset(LEUART0);
 	LEUART_Init_TypeDef leuart0_init =
@@ -51,32 +54,29 @@ void leuart_initialize(void)
 	LEUART0->IEN   = LEUART_IEN_RXDATAV;
 	NVIC_ClearPendingIRQ(LEUART0_IRQn);
 	NVIC_EnableIRQ(LEUART0_IRQn);
-	//for (i=0;i<8;i++)
-	leuart_tx(0xBB);
-	for (i=0;i<10000;i++);
-	leuart_tx(0xBB);
-	for (i=0;i<10000;i++);
-	leuart_tx(0xBB);
-	for (i=0;i<10000;i++);
-	leuart_tx(0xBB);
-	for (i=0;i<10000;i++);
-	leuart_tx(0xBB);
-	for (i=0;i<10000;i++);
-	leuart_tx(0xBB);
-	for (i=0;i<10000;i++);
-	leuart_tx(0xBB);
-	for (i=0;i<10000;i++);
-	leuart_tx(0xBB);
-	for (i=0;i<10000;i++);
-	leuart_tx(0xBB);
+	leuart_tx("LEDOFF");
 
+	//
 }
 
 
-void leuart_tx(uint8_t data)
+void leuart_tx(uint8_t* data)
 {
-	LEUART0->TXDATA	= data;
-	while (!(LEUART0->IF & LEUART_IF_TXC));
+	int i = 0;
+	/*while(data[i]!= '\0')
+	{
+		LEUART0->TXDATA	= data[i++];
+		while (!(LEUART0->STATUS & LEUART_IF_TXC));
+		LEUART0->IFC = LEUART_IF_TXC;
+
+	}*/
+	while(data[i]!='\0')
+	{
+		LEUART_Tx(LEUART0,data[i]);
+		i++;
+	}
+
+
 }
 
 uint8_t leuart_rx(void)

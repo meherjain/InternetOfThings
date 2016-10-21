@@ -1,6 +1,6 @@
 src/sleep.o: ../src/sleep.c \
- H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/sleep.h \
- H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/main.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/main.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/em_device.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/efm32lg990f256.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/CMSIS/Include/core_cm3.h \
@@ -69,15 +69,15 @@ src/sleep.o: ../src/sleep.c \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_timer.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_adc.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_dma.h \
+ C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_leuart.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/drivers/dmactrl.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_i2c.h \
- C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_leuart.h \
- H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/i2c.h \
- H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/leuart.h
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/i2c.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/leuart.h
 
-H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/sleep.h:
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h:
 
-H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/main.h:
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/main.h:
 
 C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/Device/SiliconLabs/EFM32LG/Include/em_device.h:
 
@@ -215,12 +215,12 @@ C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_adc.h:
 
 C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_dma.h:
 
+C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_leuart.h:
+
 C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/drivers/dmactrl.h:
 
 C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_i2c.h:
 
-C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_leuart.h:
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/i2c.h:
 
-H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/i2c.h:
-
-H:/Fall2016/IOT/InternetOfThings/Assignment5/inc/leuart.h:
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/leuart.h:
