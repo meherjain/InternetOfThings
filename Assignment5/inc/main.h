@@ -82,6 +82,15 @@
 #define LED1						3							// LED 1 Number
 
 
+// LEUART SAMB11 Light Sensor Message
+#define LIGHT_SENSOR				((unsigned char )'L')
+#define LED_ON						((unsigned char )'N')
+#define LED_OFF						((unsigned char )'F')
+#define PADDING						((unsigned char )'A')
+
+// LEUART SAMB11 Temperature Sensor Message
+#define TEMP_SENSOR				    ((unsigned char )'T')
+
 // ACMP Channel Definition //
 #define ACMP_POSITIVE_CHANNEL		acmpChannel6		// Channel 6 of ACMP
 #define ACMP_NEGATIVE_CHANNEL		acmpChannelVDD		// VDD Reference

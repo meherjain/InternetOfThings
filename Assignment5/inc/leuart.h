@@ -24,6 +24,7 @@
 #define LEUART_STOP_BITS	leuartStopbits1
 #define LEUART_ENABLE_RxTx	leuartEnable
 
+#define LEUART_TX_SIZE		8
 
 
 

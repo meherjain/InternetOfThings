@@ -70,8 +70,11 @@ volatile bool Temp_Notification_Flag = false;
 
 /* UART Declaration */
 struct uart_module uart_instance1;
-#define BUFFER_LEN    6
-static uint8_t string[BUFFER_LEN];
+#define BUFFER_LEN    8
+static uint8_t string[BUFFER_LEN+1];
+
+/*Temperature Buffer */
+static uint8_t temp_buffer[BUFFER_LEN+1];
 
 /*DMA Resources */
 struct dma_resource uart_dma_resource_tx;
@@ -89,12 +92,31 @@ static void transfer_done_tx(struct dma_resource* const resource )
 
 static void transfer_done_rx(struct dma_resource* const resource )
 {
-	int i =0;
+	int i=0;
 	printf("\n");
-	for (i =0;i<8;i++)
+	for(i=0;i<8;i++)
 		printf("%c",string[i]);
-	dma_start_transfer_job(&uart_dma_resource_rx);
 	printf("\n");
+	string[BUFFER_LEN] = '\0';
+	if(string[0] == LIGHT_SENSOR)
+	{
+		if(string[1] == LEDON)
+			gpio_pin_set_output_level(LED_0_PIN,LED_ON);
+					
+		else if(string[1] == LEDOFF)
+			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);		
+	}	
+	else if(string[0] == TEMP_SENSOR)
+	{
+		strcpy(temp_buffer,(string+1));
+		//printf("Temp:");
+		//for(i=0;i<8;i++)
+			//printf("%c",temp_buffer[i]);
+	}
+	//printf("%ld",strlen(temp_buffer));
+			
+	dma_start_transfer_job(&uart_dma_resource_rx);
+	
 }
 //! [transfer_done_rx]
 
@@ -254,7 +276,8 @@ static void htp_temperature_send(void) {
 	at_ble_prf_date_time_t timestamp;
 	float temperature;
 	/* Read Temperature Value from IO1 Xplained Pro */
-	temperature = at30tse_read_temperature();
+	//temperature = at30tse_read_temperature();
+	temperature = atof(temp_buffer);
 #ifdef HTPT_FLAG_FAHRENHEIT
 	temperature = (((temperature * 9.0)/5.0) + 32.0);
 #endif
@@ -274,9 +297,9 @@ static void htp_temperature_send(void) {
 	) == AT_BLE_SUCCESS)
 	{
 #ifdef HTPT_FLAG_FAHRENHEIT
-		printf("Temperature: %d Fahrenheit", (uint16_t)temperature);
+		//printf("Temperature: %d Fahrenheit\n", (uint16_t)temperature);
 #else
-		printf("Temperature: %d Deg Celsius", (uint16_t)temperature);
+		//printf("Temperature: %d Deg Celsius\n", (uint16_t)temperature);
 #endif
 	}
 }
@@ -428,6 +451,17 @@ static void htp_temperature_read(void)
 #endif
 }
 
+void led_config(void)
+{
+	struct gpio_config pin_conf;
+	gpio_get_config_defaults(&pin_conf);
+		
+	pin_conf.direction = GPIO_PIN_DIR_OUTPUT;
+	gpio_pin_set_config(LED0_PIN,&pin_conf);
+	gpio_pin_set_output_level(LED_0_PIN,LED_OFF);
+	
+}
+
 
 int main (void)
 {
@@ -436,7 +470,7 @@ int main (void)
 	/* Initialize serial console */
 	serial_console_init();
 	//configure_usart();
-	
+	led_config();
 	/* Initialize the hardware timer */
 	hw_timer_init();
 	/* Register the callback */

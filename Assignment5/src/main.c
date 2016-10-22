@@ -26,7 +26,7 @@ uint32_t Calibrated_ULFRCO    = 0;
 volatile int16_t BufferAdcData[ADC_SAMPLES];							// Global Variable for DMA to store data
 DMA_CB_TypeDef callback;												// DMA Callback Descriptors
 uint16_t adcCount_DMA_OFF	  = ADC_SAMPLES;									// ADC Counts for Interrupt handler
-//extern leuart_buffer[6] = {0};
+unsigned char leuart_buffer[8] = {0};
 
 //uint8_t ack_count =0;
 
@@ -105,8 +105,6 @@ float convertToCelsius(int32_t adcSample)
 void transferComplete(unsigned int channel, bool primary, void *user)
 {
 	uint32_t averageSample = 0;
-	uint8_t LED_OFF[] = "LEDOFF" ;
-	uint8_t LED_ON[]  = "_LEDON" ;
 	float averageTemp = 0.0;
 	int i =0;
 	ADC0->CMD |= ADC_CMD_SINGLESTOP;															// Stopping the ADC
@@ -119,17 +117,19 @@ void transferComplete(unsigned int channel, bool primary, void *user)
 	averageSample /=ADC_SAMPLES;																// Taking Average
 	averageTemp = convertToCelsius(averageSample);												// Converting ADC Sample to Celsius (Using Silicon Labs Routine)
 
+
 	if((averageTemp >= MIN_TEMP_LIMIT) && (averageTemp<=MAX_TEMP_LIMIT))						// Checking the Temp Range
 	{
 		GPIO_PinOutClear(LED,LED1);																// LED OFF if inside the range
-		//leuart_tx(LED_OFF);
 	}
 
 	else if(averageTemp < MIN_TEMP_LIMIT || (averageTemp>=MAX_TEMP_LIMIT))
 	{
 		GPIO_PinOutSet(LED,LED1);																// LED ON if outside the range
-		//leuart_tx(LED_ON);
 	}
+	leuart_buffer[0] =	TEMP_SENSOR;															// Temperature Header in leuart_buffer
+	snprintf((leuart_buffer+1),LEUART_TX_SIZE,"%f",averageTemp);								// Converting float to string to put in leaurt_buffer
+	leuart_tx(leuart_buffer);																	// LEUART Transmission
 
 }
 
@@ -143,8 +143,7 @@ void transferComplete(unsigned int channel, bool primary, void *user)
 
 void  GPIO_ODD_IRQHandler(void)
 {
-	uint16_t sensor_value;
-	int i;
+	uint16_t sensor_value,i=0;
 	INT_Disable();																// Disable the interrupts//
 	GPIO_IntClear(GPIO_IntGet());												// Get and Clear the GPIO Interrupt
 	//for (i =0; i<1000;i++);
@@ -154,19 +153,30 @@ void  GPIO_ODD_IRQHandler(void)
 	sensor_value = I2C_ReadByte(ADC0_LOW_COMMAND);								// Read the ADC Value from the sensor (lower byte)
 	//for (i =0; i<I2C_DELAY;i++);												// Given some delay b/w to reads, Or else, TSL2561 /
 																				//	was not giving ACK for the code gets stuck in ACK polling //
+
+	leuart_buffer[0] = LIGHT_SENSOR;											// Setting up light sensor header for LEUART Buffer
+
 	sensor_value |= (I2C_ReadByte(ADC0_HIGH_COMMAND)<<8);						// Reading the higher byte
 	
 	/* LED Operation as per requirement */
 	if ((sensor_value < TSL2561_LOW_THRESHOLD) && (sensor_value > 0))			
 	{
 		GPIO_PinOutSet(LED,LED0);
-		leuart_tx("_LEDON");
+		leuart_buffer[1] = LED_ON;												// LED_ON message in leuart Buffer //
+		for (i=2;i<LEUART_TX_SIZE;i++)											// Padding the rest of the bytes to maintain the buffer size
+			leuart_buffer[i] = PADDING;
 
+		leuart_tx(leuart_buffer);												// LEUART Transmission //
 	}
 	else if (sensor_value > TSL2561_HIGH_THRESHOLD)
 	{
 		GPIO_PinOutClear(LED,LED0);
-		leuart_tx("LEDOFF");
+		leuart_buffer[1] = LED_OFF;												// LED OFF message in leuart buffer //
+		for (i=2;i<LEUART_TX_SIZE;i++)										    // Padding the rest of the bytes to maintain the buffer size
+			leuart_buffer[i] = PADDING;
+
+		leuart_tx(leuart_buffer);												 // LEUART Transmission //
+
 	}
 
 	INT_Enable();																// Enable the interrupt
@@ -341,7 +351,7 @@ void LETIMER0_IRQHandler(void)
 			GPIO_PinOutSet(LPM_GPIO_Port,LPM_GPIO_Pin);												// Load Power Management using GPIO
 			I2C_PIN_Initialize();
 			GPIO_PinModeSet(GPIO_INT_PORT,GPIO_INT_PIN,gpioModeInput,0);
-			for (int i=0;i<I2C_SHORT_DELAY;i++);																// Some delay b/w starting I2C Communication and powerup the device
+			for (int i=0;i<I2C_SHORT_DELAY;i++);													// Some delay b/w starting I2C Communication and powerup the device
 			TL2561_init();																			// Sending Initialize sequence to TL2561
 			NVIC_EnableIRQ(GPIO_ODD_IRQn);															// Enable the GPIO Interrupt
 			GPIO_PinOutSet(GPIO_INT_PORT,GPIO_INT_PIN);												// Enable the GPIO Interrupt

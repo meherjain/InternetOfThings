@@ -70,12 +70,10 @@ void leuart_tx(uint8_t* data)
 		LEUART0->IFC = LEUART_IF_TXC;
 
 	}*/
-	while(data[i]!='\0')
+	for (i =0;i<LEUART_TX_SIZE;i++)
 	{
 		LEUART_Tx(LEUART0,data[i]);
-		i++;
 	}
-
 
 }
 

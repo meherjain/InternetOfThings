@@ -55,6 +55,15 @@
 /** @brief APP_ADV_TIMEOUT Advertising time-out between 0x0001 and 0x028F in seconds, 0x0000 disables time-out.*/
 #define APP_ADV_TIMEOUT						(655)
 
+/* LED Decraltion */
+#define LED_OFF								1
+#define LED_ON								0
+
+/* Leopard Gecko UART Message */
+#define LEDON						((unsigned char )'N')
+#define LEDOFF						((unsigned char )'F')
+#define TEMP_SENSOR				    ((unsigned char )'T')
+#define LIGHT_SENSOR			    ((unsigned char )'L')	
 
 
 #endif /* __STARTUP_TEMPLATE_H__ */
