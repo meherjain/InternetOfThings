@@ -7180,7 +7180,7 @@ OUTPUT(SAM_B11_HTP_Hands-On.elf elf32-littlearm)
  .comment       0x000000b4       0x5c ../src/ASF/thirdparty/wireless/ble_smart_sdk/lib/cm0/gcc\libblusdk.a(gattm_task.o)
  .comment       0x000000b4       0x5c ../src/ASF/thirdparty/wireless/ble_smart_sdk/lib/cm0/gcc\libblusdk.a(htpt_task.o)
 
-.debug_info     0x00000000    0x2e95e
+.debug_info     0x00000000    0x2e963
  .debug_info    0x00000000     0x10ec src/ASF/common2/components/memory/eeprom/at30tse75x/at30tse75x.o
  .debug_info    0x000010ec     0x90cf src/ASF/sam0/drivers/dma/dma_sam_b.o
  .debug_info    0x0000a1bb     0x173b src/ASF/sam0/drivers/i2c/i2c_master.o
@@ -7199,9 +7199,9 @@ OUTPUT(SAM_B11_HTP_Hands-On.elf elf32-littlearm)
  .debug_info    0x00029128      0x31b src/ASF/thirdparty/wireless/ble_smart_sdk/src/event_handler.o
  .debug_info    0x00029443     0x1557 src/ASF/thirdparty/wireless/ble_smart_sdk/src/platform_drv.o
  .debug_info    0x0002a99a     0x12ee src/ASF/thirdparty/wireless/ble_smart_sdk/src/port_from_sdk.o
- .debug_info    0x0002bc88     0x2cd6 src/startup_template_app.o
+ .debug_info    0x0002bc88     0x2cdb src/startup_template_app.o
 
-.debug_abbrev   0x00000000     0x358e
+.debug_abbrev   0x00000000     0x356e
  .debug_abbrev  0x00000000      0x2c7 src/ASF/common2/components/memory/eeprom/at30tse75x/at30tse75x.o
  .debug_abbrev  0x000002c7      0x40d src/ASF/sam0/drivers/dma/dma_sam_b.o
  .debug_abbrev  0x000006d4      0x3da src/ASF/sam0/drivers/i2c/i2c_master.o
@@ -7220,7 +7220,7 @@ OUTPUT(SAM_B11_HTP_Hands-On.elf elf32-littlearm)
  .debug_abbrev  0x00002902      0x166 src/ASF/thirdparty/wireless/ble_smart_sdk/src/event_handler.o
  .debug_abbrev  0x00002a68      0x460 src/ASF/thirdparty/wireless/ble_smart_sdk/src/platform_drv.o
  .debug_abbrev  0x00002ec8      0x252 src/ASF/thirdparty/wireless/ble_smart_sdk/src/port_from_sdk.o
- .debug_abbrev  0x0000311a      0x474 src/startup_template_app.o
+ .debug_abbrev  0x0000311a      0x454 src/startup_template_app.o
 
 .debug_loc      0x00000000     0x7da6
  .debug_loc     0x00000000      0x547 src/ASF/common2/components/memory/eeprom/at30tse75x/at30tse75x.o
@@ -7473,7 +7473,7 @@ OUTPUT(SAM_B11_HTP_Hands-On.elf elf32-littlearm)
  .debug_line    0x0000b582      0xa24 src/ASF/thirdparty/wireless/ble_smart_sdk/src/port_from_sdk.o
  .debug_line    0x0000bfa6      0xecc src/startup_template_app.o
 
-.debug_str      0x00000000   0x10c465
+.debug_str      0x00000000   0x10c4b6
  .debug_str     0x00000000    0xe96f0 src/ASF/common2/components/memory/eeprom/at30tse75x/at30tse75x.o
                               0xe9b13 (size before relaxing)
  .debug_str     0x000e96f0     0x4d78 src/ASF/sam0/drivers/dma/dma_sam_b.o
@@ -7510,8 +7510,8 @@ OUTPUT(SAM_B11_HTP_Hands-On.elf elf32-littlearm)
                               0xf7fad (size before relaxing)
  .debug_str     0x0010bb3f      0x226 src/ASF/thirdparty/wireless/ble_smart_sdk/src/port_from_sdk.o
                               0xe781e (size before relaxing)
- .debug_str     0x0010bd65      0x700 src/startup_template_app.o
-                              0xf09f2 (size before relaxing)
+ .debug_str     0x0010bd65      0x751 src/startup_template_app.o
+                              0xf09c7 (size before relaxing)
 
 .debug_frame    0x00000000     0x2580
  .debug_frame   0x00000000       0xf4 src/ASF/common2/components/memory/eeprom/at30tse75x/at30tse75x.o

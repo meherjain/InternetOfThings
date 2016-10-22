@@ -70,11 +70,11 @@ volatile bool Temp_Notification_Flag = false;
 
 /* UART Declaration */
 struct uart_module uart_instance1;
-#define BUFFER_LEN    8
+#define BUFFER_LEN    8											// DMA Callback Size for UART
 static uint8_t string[BUFFER_LEN+1];
 
 /*Temperature Buffer */
-static uint8_t temp_buffer[BUFFER_LEN+1];
+static uint8_t temp_buffer[BUFFER_LEN+1];						// Temperature Buffer for BLE
 
 /*DMA Resources */
 struct dma_resource uart_dma_resource_tx;
@@ -90,6 +90,19 @@ static void transfer_done_tx(struct dma_resource* const resource )
 	dma_start_transfer_job(&uart_dma_resource_tx);
 }
 
+/*
+Added by Meher Jain
+Parse the leuart message received from leopard gecko
+
+Message Format:
+
+Size: 8 bytes
+Header: 1 Byte 'T' for temperature sensor and 'L' for light sensor
+Light Sensor: 2nd Byte 'O' for LED ON on leopard gecko and 'F' for LED ON on leopard gecko
+
+Temperature Sensor: next 7 bytes for the floating point temperature from leopard gecko in string format		 
+*/
+
 static void transfer_done_rx(struct dma_resource* const resource )
 {
 	int i=0;
@@ -97,25 +110,25 @@ static void transfer_done_rx(struct dma_resource* const resource )
 	for(i=0;i<8;i++)
 		printf("%c",string[i]);
 	printf("\n");
-	string[BUFFER_LEN] = '\0';
-	if(string[0] == LIGHT_SENSOR)
+	string[BUFFER_LEN] = '\0';												// Adding NULL at the end of the string for string function to work properly
+	if(string[0] == LIGHT_SENSOR)											// Parsing the leuart message header 
 	{
 		if(string[1] == LEDON)
-			gpio_pin_set_output_level(LED_0_PIN,LED_ON);
+			gpio_pin_set_output_level(LED_0_PIN,LED_ON);					// Turn the LED ON when ON message is received from leopard gecko 
 					
 		else if(string[1] == LEDOFF)
-			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);		
+			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);					// Turn the LED OFF when OFF message is received from leopard gecko			
 	}	
-	else if(string[0] == TEMP_SENSOR)
+	else if(string[0] == TEMP_SENSOR)										// Temp Sensor Header
 	{
-		strcpy(temp_buffer,(string+1));
+		strcpy(temp_buffer,(string+1));										// Copying the string buffer to another buffer for BLE to send
 		//printf("Temp:");
 		//for(i=0;i<8;i++)
 			//printf("%c",temp_buffer[i]);
 	}
 	//printf("%ld",strlen(temp_buffer));
 			
-	dma_start_transfer_job(&uart_dma_resource_rx);
+	dma_start_transfer_job(&uart_dma_resource_rx);							// Reinitiating the DMA Transfer //
 	
 }
 //! [transfer_done_rx]

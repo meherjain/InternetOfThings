@@ -24,9 +24,11 @@ uint8_t counter_flag		  = 0;
 #endif
 uint32_t Calibrated_ULFRCO    = 0;
 volatile int16_t BufferAdcData[ADC_SAMPLES];							// Global Variable for DMA to store data
-DMA_CB_TypeDef callback;												// DMA Callback Descriptors
-uint16_t adcCount_DMA_OFF	  = ADC_SAMPLES;									// ADC Counts for Interrupt handler
+DMA_CB_TypeDef callback[DMA_CHANNEL_NO];     							// DMA Callback Descriptors
+uint16_t adcCount_DMA_OFF	  = ADC_SAMPLES;							// ADC Counts for Interrupt handler
 unsigned char leuart_buffer[8] = {0};
+static uint8_t tx_count = 1;
+
 
 //uint8_t ack_count =0;
 
@@ -129,6 +131,7 @@ void transferComplete(unsigned int channel, bool primary, void *user)
 	}
 	leuart_buffer[0] =	TEMP_SENSOR;															// Temperature Header in leuart_buffer
 	snprintf((leuart_buffer+1),LEUART_TX_SIZE,"%f",averageTemp);								// Converting float to string to put in leaurt_buffer
+	blockSleepMode(EM2);
 	leuart_tx(leuart_buffer);																	// LEUART Transmission
 
 }
@@ -166,6 +169,7 @@ void  GPIO_ODD_IRQHandler(void)
 		for (i=2;i<LEUART_TX_SIZE;i++)											// Padding the rest of the bytes to maintain the buffer size
 			leuart_buffer[i] = PADDING;
 
+		blockSleepMode(EM2);
 		leuart_tx(leuart_buffer);												// LEUART Transmission //
 	}
 	else if (sensor_value > TSL2561_HIGH_THRESHOLD)
@@ -175,8 +179,8 @@ void  GPIO_ODD_IRQHandler(void)
 		for (i=2;i<LEUART_TX_SIZE;i++)										    // Padding the rest of the bytes to maintain the buffer size
 			leuart_buffer[i] = PADDING;
 
+		blockSleepMode(EM2);
 		leuart_tx(leuart_buffer);												 // LEUART Transmission //
-
 	}
 
 	INT_Enable();																// Enable the interrupt
@@ -457,16 +461,18 @@ void clock_init(sleepstate_enum EMx)
 	{
 		CMU_OscillatorEnable(cmuOsc_LFXO,true,true);										// Enable the LFXO oscillator for EM2
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_LFXO);									// Selecting the LFA clock tree
-		CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);									// Selecting the LFB clock tree
-		CMU_ClockEnable(cmuClock_LFB, true);
+
 	}
 	else if (EMx == EM3)																	// Check the current energy mode
 	{
 		CMU_OscillatorEnable(cmuOsc_ULFRCO,true,true);										// Enable the ULFRCO for EM3
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_ULFRCO);									// Selecting the LFA clock tree
 	}
-	CMU_ClockEnable(cmuClock_HFPER,true);									//Enabling the High Frequency peripheral
+	CMU_ClockEnable(cmuClock_HFPER,true);													//Enabling the High Frequency peripheral
 	CMU_ClockEnable(cmuClock_CORELE,true);													// Enable the CORELE
+	CMU_ClockEnable(cmuClock_DMA, true);
+	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);									// Selecting the LFB clock tree
+	CMU_ClockEnable(cmuClock_LFB, true);
 }
 
 /*
@@ -750,9 +756,9 @@ void adcConfig()
  * Frequency: Once
  * Disclaimer: Only Called if DMA is used
  */
-void dmaConfig(void)
+void dmaConfig_ADC(void)
 {
-	CMU_ClockEnable(cmuClock_DMA, true);
+
 	/* Initializing DMA descriptors */
 	DMA_Init_TypeDef		dmaInit;
 	DMA_CfgChannel_TypeDef	chnlCfg;
@@ -762,16 +768,16 @@ void dmaConfig(void)
 	dmaInit.controlBlock = dmaControlBlock;
 	DMA_Init(&dmaInit);																// Initializing the DMA
 
-	callback.cbFunc  	 = transferComplete;										// Call back function on completion of DMA transfer
-	callback.userPtr 	 = NULL;
+	callback[DMA_CHANNEL_ADC].cbFunc  	 = transferComplete;						// Call back function on completion of DMA transfer
+	callback[DMA_CHANNEL_ADC].userPtr 	 = NULL;
 
-	chnlCfg.cb 		 	 = &callback;
+	chnlCfg.cb 		 	 = &callback[DMA_CHANNEL_ADC];
 	chnlCfg.enableInt	 = true;													// Enable the interuupt on completion of DMA transfer
 	chnlCfg.highPri      = true;													// set ADC as high priority channel
 	chnlCfg.select       = DMAREQ_ADC0_SINGLE;										// ADC channel as a source for DMA signals
 	DMA_CfgChannel(DMA_CHANNEL_ADC, &chnlCfg);										// Configuration of DMA channels
 
-	descrCfg.arbRate	 = 0;														// No arbritration, since, ADC is only peripheral using DMA
+	descrCfg.arbRate	 = 1;														// No arbritration, since, ADC is only peripheral using DMA
 	descrCfg.dstInc		 = dmaDataInc2;												// 2 bytes of address increment at destination (12 bit ADC)
 	descrCfg.srcInc		 = dmaDataIncNone;											// No address increment at source (ADC buffer)
 	descrCfg.size        = dmaDataSize2;											// 2 bytes of data transfer
@@ -799,8 +805,8 @@ int main(void)
   I2C_Initialize();													// Initialize the I2C1
   leuart_initialize();												// Initialize the LEUART0
   adcConfig();														// Configuring the ADC
-#if defined(DMA_ON)													// If DMA is used
-  dmaConfig();														// Configuring the DMA
+ #if defined(DMA_ON)													// If DMA is used
+  dmaConfig_ADC();														// Configuring the DMA
 #endif
 #if defined(INTERNAL_SENSOR_ON)
   ACMPInit(EnergyMode);												// Initializing the ACMP

@@ -66,7 +66,9 @@
 #define DEV_ADC_CAL_ADDRESS 	   (*(volatile unsigned long *) (0x0FE081BCUL))
 
 // DMA Definition //
+#define DMA_CHANNEL_NO				2
 #define DMA_CHANNEL_ADC				0							// Using DMA channel 0 for ADC transfer
+#define DMA_CHANNEL_TX_LEUART	    1
 
 // Load Power Management Pin
 #define LPM_GPIO_Port				gpioPortD

@@ -15,23 +15,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   5 .comment      000000b4  00000000  00000000  00015408  2**0
                   CONTENTS, READONLY
-  6 .debug_info   0002e95e  00000000  00000000  000154bc  2**0
+  6 .debug_info   0002e963  00000000  00000000  000154bc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 0000358e  00000000  00000000  00043e1a  2**0
+  7 .debug_abbrev 0000356e  00000000  00000000  00043e1f  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_loc    00007da6  00000000  00000000  000473a8  2**0
+  8 .debug_loc    00007da6  00000000  00000000  0004738d  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_aranges 00000810  00000000  00000000  0004f14e  2**0
+  9 .debug_aranges 00000810  00000000  00000000  0004f133  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000850  00000000  00000000  0004f95e  2**0
+ 10 .debug_ranges 00000850  00000000  00000000  0004f943  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_macro  0001d98c  00000000  00000000  000501ae  2**0
+ 11 .debug_macro  0001d98c  00000000  00000000  00050193  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_line   0000ce72  00000000  00000000  0006db3a  2**0
+ 12 .debug_line   0000ce72  00000000  00000000  0006db1f  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_str    0010c465  00000000  00000000  0007a9ac  2**0
+ 13 .debug_str    0010c4b6  00000000  00000000  0007a991  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_frame  00002580  00000000  00000000  00186e14  2**2
+ 14 .debug_frame  00002580  00000000  00000000  00186e48  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -14405,9 +14405,9 @@ static at_ble_status_t ble_disconnected_cb (void *param)
 1000bc40:	1000bbb1 	.word	0x1000bbb1
 
 1000bc44 <transfer_done_rx>:
-{
-	dma_start_transfer_job(&uart_dma_resource_tx);
-}
+
+Temperature Sensor: next 7 bytes for the floating point temperature from leopard gecko in string format		 
+*/
 
 static void transfer_done_rx(struct dma_resource* const resource )
 {
@@ -14438,11 +14438,11 @@ static void transfer_done_rx(struct dma_resource* const resource )
 1000bc5c:	200a      	movs	r0, #10
 1000bc5e:	4b11      	ldr	r3, [pc, #68]	; (1000bca4 <transfer_done_rx+0x60>)
 1000bc60:	4798      	blx	r3
-	string[BUFFER_LEN] = '\0';
+	string[BUFFER_LEN] = '\0';												// Adding NULL at the end of the string for string function to work properly
 1000bc62:	4b11      	ldr	r3, [pc, #68]	; (1000bca8 <transfer_done_rx+0x64>)
 1000bc64:	2200      	movs	r2, #0
 1000bc66:	721a      	strb	r2, [r3, #8]
-	if(string[0] == LIGHT_SENSOR)
+	if(string[0] == LIGHT_SENSOR)											// Parsing the leuart message header 
 1000bc68:	781b      	ldrb	r3, [r3, #0]
 1000bc6a:	2b4c      	cmp	r3, #76	; 0x4c
 1000bc6c:	d10f      	bne.n	1000bc8e <transfer_done_rx+0x4a>
@@ -14452,7 +14452,7 @@ static void transfer_done_rx(struct dma_resource* const resource )
 1000bc70:	785b      	ldrb	r3, [r3, #1]
 1000bc72:	2b4e      	cmp	r3, #78	; 0x4e
 1000bc74:	d104      	bne.n	1000bc80 <transfer_done_rx+0x3c>
-			gpio_pin_set_output_level(LED_0_PIN,LED_ON);
+			gpio_pin_set_output_level(LED_0_PIN,LED_ON);					// Turn the LED ON when ON message is received from leopard gecko 
 1000bc76:	2100      	movs	r1, #0
 1000bc78:	2016      	movs	r0, #22
 1000bc7a:	4b0c      	ldr	r3, [pc, #48]	; (1000bcac <transfer_done_rx+0x68>)
@@ -14462,18 +14462,18 @@ static void transfer_done_rx(struct dma_resource* const resource )
 		else if(string[1] == LEDOFF)
 1000bc80:	2b46      	cmp	r3, #70	; 0x46
 1000bc82:	d10b      	bne.n	1000bc9c <transfer_done_rx+0x58>
-			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);		
+			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);					// Turn the LED OFF when OFF message is received from leopard gecko			
 1000bc84:	2101      	movs	r1, #1
 1000bc86:	2016      	movs	r0, #22
 1000bc88:	4b08      	ldr	r3, [pc, #32]	; (1000bcac <transfer_done_rx+0x68>)
 1000bc8a:	4798      	blx	r3
 1000bc8c:	e006      	b.n	1000bc9c <transfer_done_rx+0x58>
 	}	
-	else if(string[0] == TEMP_SENSOR)
+	else if(string[0] == TEMP_SENSOR)										// Temp Sensor Header
 1000bc8e:	2b54      	cmp	r3, #84	; 0x54
 1000bc90:	d104      	bne.n	1000bc9c <transfer_done_rx+0x58>
 	{
-		strcpy(temp_buffer,(string+1));
+		strcpy(temp_buffer,(string+1));										// Copying the string buffer to another buffer for BLE to send
 1000bc92:	4905      	ldr	r1, [pc, #20]	; (1000bca8 <transfer_done_rx+0x64>)
 1000bc94:	3101      	adds	r1, #1
 1000bc96:	4806      	ldr	r0, [pc, #24]	; (1000bcb0 <transfer_done_rx+0x6c>)
@@ -14484,7 +14484,7 @@ static void transfer_done_rx(struct dma_resource* const resource )
 	}
 	//printf("%ld",strlen(temp_buffer));
 			
-	dma_start_transfer_job(&uart_dma_resource_rx);
+	dma_start_transfer_job(&uart_dma_resource_rx);							// Reinitiating the DMA Transfer //
 1000bc9c:	4806      	ldr	r0, [pc, #24]	; (1000bcb8 <transfer_done_rx+0x74>)
 1000bc9e:	4b07      	ldr	r3, [pc, #28]	; (1000bcbc <transfer_done_rx+0x78>)
 1000bca0:	4798      	blx	r3
