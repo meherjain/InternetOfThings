@@ -11,6 +11,8 @@
 #include "sleep.h"
 #include "main.h"
 
+
+//bool  tx_flag = false;
 /********************************************Declaring the global constants ***************************/
 uint32_t ACMP_OUT             = 0;										// ACMP Output //
 uint32_t LETIMER_COMP0        = 0;										// LETIMERE_COMP0 Register Value */
@@ -132,6 +134,13 @@ void transferComplete(unsigned int channel, bool primary, void *user)
 	leuart_buffer[0] =	TEMP_SENSOR;															// Temperature Header in leuart_buffer
 	snprintf((leuart_buffer+1),LEUART_TX_SIZE,"%f",averageTemp);								// Converting float to string to put in leaurt_buffer
 	blockSleepMode(EM2);
+	while (!(CMU->STATUS & CMU_STATUS_LFXORDY));
+	//CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);								    // Selecting the LFB clock tree
+	//CMU_ClockEnable(cmuClock_LFB, true);
+	//LEUART0->TXDATA = leuart_buffer[0];
+	//tx_flag = true;
+
+
 	leuart_tx(leuart_buffer);																	// LEUART Transmission
 
 }
@@ -169,8 +178,8 @@ void  GPIO_ODD_IRQHandler(void)
 		for (i=2;i<LEUART_TX_SIZE;i++)											// Padding the rest of the bytes to maintain the buffer size
 			leuart_buffer[i] = PADDING;
 
-		blockSleepMode(EM2);
-		leuart_tx(leuart_buffer);												// LEUART Transmission //
+		//blockSleepMode(EM2);
+		//leuart_tx(leuart_buffer);												// LEUART Transmission //
 	}
 	else if (sensor_value > TSL2561_HIGH_THRESHOLD)
 	{
@@ -179,8 +188,8 @@ void  GPIO_ODD_IRQHandler(void)
 		for (i=2;i<LEUART_TX_SIZE;i++)										    // Padding the rest of the bytes to maintain the buffer size
 			leuart_buffer[i] = PADDING;
 
-		blockSleepMode(EM2);
-		leuart_tx(leuart_buffer);												 // LEUART Transmission //
+		//blockSleepMode(EM2);
+		//leuart_tx(leuart_buffer);												 // LEUART Transmission //
 	}
 
 	INT_Enable();																// Enable the interrupt
@@ -461,6 +470,8 @@ void clock_init(sleepstate_enum EMx)
 	{
 		CMU_OscillatorEnable(cmuOsc_LFXO,true,true);										// Enable the LFXO oscillator for EM2
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_LFXO);									// Selecting the LFA clock tree
+		CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);								    // Selecting the LFB clock tree
+		CMU_ClockEnable(cmuClock_LFB, true);
 
 	}
 	else if (EMx == EM3)																	// Check the current energy mode
@@ -470,9 +481,10 @@ void clock_init(sleepstate_enum EMx)
 	}
 	CMU_ClockEnable(cmuClock_HFPER,true);													//Enabling the High Frequency peripheral
 	CMU_ClockEnable(cmuClock_CORELE,true);													// Enable the CORELE
-	CMU_ClockEnable(cmuClock_DMA, true);
-	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);									// Selecting the LFB clock tree
+
+	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);								    // Selecting the LFB clock tree
 	CMU_ClockEnable(cmuClock_LFB, true);
+
 }
 
 /*
@@ -758,7 +770,7 @@ void adcConfig()
  */
 void dmaConfig_ADC(void)
 {
-
+	CMU_ClockEnable(cmuClock_DMA, true);
 	/* Initializing DMA descriptors */
 	DMA_Init_TypeDef		dmaInit;
 	DMA_CfgChannel_TypeDef	chnlCfg;

@@ -11,6 +11,8 @@
 
 static uint8_t tx_count = 1;
 extern uint8_t leuart_buffer[];
+static uint8_t leuart_rx_buffer[8] = {0};
+static uint8_t rx_count = 0;
 bool tx_flag = false;
 
 /*
@@ -23,20 +25,49 @@ bool tx_flag = false;
 
 void LEUART0_IRQHandler(void)
 {
-	INT_Disable();
+	/*INT_Disable();
 	uint32_t int_flag = LEUART_IntGet(LEUART0);
-	LEUART_IntClear(LEUART0,int_flag);
-	if((tx_count < LEUART_TX_SIZE) && (tx_flag))
+	if(LEUART0->IF & LEUART_IF_TXC)
 	{
-		LEUART0->TXDATA = leuart_buffer[tx_count];
-		tx_count++;
-		if (tx_count == LEUART_TX_SIZE)
+		LEUART0->IFC |= LEUART_IF_TXC;
+		if((tx_count < LEUART_TX_SIZE) && (tx_flag))
 		{
-			tx_count =1;
-			tx_flag = false;
-			unblockSleepMode(EM2);
+			LEUART0->TXDATA = leuart_buffer[tx_count];
+			tx_count++;
+			if (tx_count == LEUART_TX_SIZE)
+			{
+				tx_count =1;
+				tx_flag = false;
+				unblockSleepMode(EM2);
+			}
 		}
 	}
+
+	else if(LEUART0->IF & LEUART_IF_RXDATAV)
+	{
+		LEUART0->IFC |=LEUART_IF_RXDATAV;
+		leuart_rx_buffer[rx_count] = LEUART0->RXDATA;
+		rx_count++;
+		if(rx_count == 8)
+			rx_count = 0;
+	}
+
+	INT_Enable();*/
+	INT_Disable();
+		uint32_t int_flag = LEUART_IntGet(LEUART0);
+		LEUART_IntClear(LEUART0,int_flag);
+		if((tx_count < LEUART_TX_SIZE) && (tx_flag))
+		{
+			LEUART0->TXDATA = leuart_buffer[tx_count];
+			tx_count++;
+			if (tx_count == LEUART_TX_SIZE)
+			{
+				tx_count =1;
+				tx_flag = false;
+
+				unblockSleepMode(EM2);
+			}
+		}
 	INT_Enable();
 }
 
@@ -98,9 +129,10 @@ void leuart_initialize(void)
 	LEUART0->ROUTE |= LEUART_ROUTE_LOCATION_LOC0;								// Route the GPIO locations
 	LEUART0->ROUTE |= LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN;					// Route the GPIO Pins
 
-	//LEUART0->CTRL|= LEUART_CTRL_LOOPBK;
+//	LEUART0->CTRL|= LEUART_CTRL_LOOPBK;
 	leuart_pin_initialize();													// Initialize the LEUART GPIO Pins//
-	LEUART0->IEN   = LEUART_IEN_TXC;
+	LEUART0->IEN   |= LEUART_IEN_TXC;
+	//LEUART0->IEN   |= LEUART_IEN_RXDATAV;
 	NVIC_ClearPendingIRQ(LEUART0_IRQn);
 	NVIC_EnableIRQ(LEUART0_IRQn);
 }
@@ -108,6 +140,7 @@ void leuart_initialize(void)
 
 void leuart_tx(uint8_t* data)
 {
+	//while (!(CMU->STATUS & CMU_STATUS_LFXORDY));
 	LEUART_Tx(LEUART0,data[0]);
 	tx_flag = true;
 }
