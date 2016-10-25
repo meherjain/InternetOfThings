@@ -70,11 +70,11 @@ volatile bool Temp_Notification_Flag = false;
 
 /* UART Declaration */
 struct uart_module uart_instance1;
-#define BUFFER_LEN    8											// DMA Callback Size for UART
+#define BUFFER_LEN    6
 static uint8_t string[BUFFER_LEN+1];
 
 /*Temperature Buffer */
-static uint8_t temp_buffer[BUFFER_LEN+1];						// Temperature Buffer for BLE
+static uint8_t temperature_buffer[BUFFER_LEN+1];
 
 /*DMA Resources */
 struct dma_resource uart_dma_resource_tx;
@@ -90,45 +90,35 @@ static void transfer_done_tx(struct dma_resource* const resource )
 	dma_start_transfer_job(&uart_dma_resource_tx);
 }
 
-/*
-Added by Meher Jain
-Parse the leuart message received from leopard gecko
-
-Message Format:
-
-Size: 8 bytes
-Header: 1 Byte 'T' for temperature sensor and 'L' for light sensor
-Light Sensor: 2nd Byte 'O' for LED ON on leopard gecko and 'F' for LED ON on leopard gecko
-
-Temperature Sensor: next 7 bytes for the floating point temperature from leopard gecko in string format		 
-*/
-
 static void transfer_done_rx(struct dma_resource* const resource )
 {
+	dma_start_transfer_job(&uart_dma_resource_rx);
 	int i=0;
+	uint8_t temp_buffer[BUFFER_LEN+1];
+	strcpy(temp_buffer,string);
+	memset(string,0,sizeof(string));
 	printf("\n");
+	//printf("MJ: %s", temp_buffer);
 	for(i=0;i<8;i++)
-		printf("%c",string[i]);
+ 		printf("%c",temp_buffer[i]);
 	printf("\n");
-	string[BUFFER_LEN] = '\0';												// Adding NULL at the end of the string for string function to work properly
-	if(string[0] == LIGHT_SENSOR)											// Parsing the leuart message header 
+	temp_buffer[BUFFER_LEN] = '\0';
+	if(temp_buffer[0] == LIGHT_SENSOR)
 	{
-		if(string[1] == LEDON)
-			gpio_pin_set_output_level(LED_0_PIN,LED_ON);					// Turn the LED ON when ON message is received from leopard gecko 
+		if(temp_buffer[1] == LEDON)
+			gpio_pin_set_output_level(LED_0_PIN,LED_ON);
 					
-		else if(string[1] == LEDOFF)
-			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);					// Turn the LED OFF when OFF message is received from leopard gecko			
+		else if(temp_buffer[1] == LEDOFF)
+			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);		
 	}	
-	else if(string[0] == TEMP_SENSOR)										// Temp Sensor Header
+	else if(temp_buffer[0] == TEMP_SENSOR)
 	{
-		strcpy(temp_buffer,(string+1));										// Copying the string buffer to another buffer for BLE to send
+		strcpy(temperature_buffer,(temp_buffer+1));
 		//printf("Temp:");
 		//for(i=0;i<8;i++)
 			//printf("%c",temp_buffer[i]);
 	}
-	//printf("%ld",strlen(temp_buffer));
-			
-	dma_start_transfer_job(&uart_dma_resource_rx);							// Reinitiating the DMA Transfer //
+	//printf("%ld",strlen(temp_buffer));	
 	
 }
 //! [transfer_done_rx]
@@ -290,7 +280,7 @@ static void htp_temperature_send(void) {
 	float temperature;
 	/* Read Temperature Value from IO1 Xplained Pro */
 	//temperature = at30tse_read_temperature();
-	temperature = atof(temp_buffer);
+	temperature = atof(temperature_buffer);
 #ifdef HTPT_FLAG_FAHRENHEIT
 	temperature = (((temperature * 9.0)/5.0) + 32.0);
 #endif
@@ -537,11 +527,11 @@ int main (void)
 	
 	
 	while(1) {
-		ble_event_task(655);  // 655: 10 min
-		if (Timer_Flag & Temp_Notification_Flag)
-		{
-			htp_temperature_send();
-		}
+ 		ble_event_task(655);  // 655: 10 min
+ 		if (Timer_Flag & Temp_Notification_Flag)
+ 		{
+ 			htp_temperature_send();
+ 		}
 
 	}
 }
