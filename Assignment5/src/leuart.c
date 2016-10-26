@@ -7,67 +7,53 @@
 
 
 #include "leuart.h"
+#include "sleep.h"
 
-
-static uint8_t tx_count = 1;
+static uint8_t tx_count = 0;
 extern uint8_t leuart_buffer[];
-static uint8_t leuart_rx_buffer[8] = {0};
-static uint8_t rx_count = 0;
 bool tx_flag = false;
 
 /*
  * LEUART Interrupt Handler
- * Description: The routine clears the TSL2561 interrupt using I2C Bus and reads the value of TSL2561 ADC0 (2 byte) to decide on the
- * Light intesity and turn LED0 on and off as per the requirement.
+ * Description: The routine handles the LEUART0 interrupt and send the rest of the (LEUART_TX_SIZE -1) bytes in the interrupt
  * Args: None
  * Return: None
  */
 
 void LEUART0_IRQHandler(void)
 {
-	/*INT_Disable();
+	INT_Disable();																	// Disable the interrupt
 	uint32_t int_flag = LEUART_IntGet(LEUART0);
-	if(LEUART0->IF & LEUART_IF_TXC)
+	LEUART_IntClear(LEUART0,int_flag);
+	if((int_flag & LEUART_IF_TXBL) && (tx_count ==0))								// 1st tx happens when TXBL interrupt happens
 	{
-		LEUART0->IFC |= LEUART_IF_TXC;
-		if((tx_count < LEUART_TX_SIZE) && (tx_flag))
+		LEUART0->TXDATA = leuart_buffer[0];											// Start Tx
+		LEUART0->IEN &=~LEUART_IEN_TXBL;											// Disable TXBL interrupt
+		LEUART0->IEN |= LEUART_IEN_TXC;												// Enable Tx Complete interrupt
+		tx_flag = true;																// Enable the tx flag
+		tx_count++;																	// Increment the tx count
+
+	}
+	else if ((int_flag & LEUART_IF_TXC))											// If Txc Interrupt
+	{
+		if((tx_count < LEUART_TX_SIZE) && (tx_flag))								// Only transmit till LEUART_TX_SIZE
 		{
 			LEUART0->TXDATA = leuart_buffer[tx_count];
+			//LEUART0->IFC |= LEUART_IFC_TXC;
 			tx_count++;
-			if (tx_count == LEUART_TX_SIZE)
+			if (tx_count == LEUART_TX_SIZE)									  // Transmission Complete
 			{
-				tx_count =1;
-				tx_flag = false;
-				unblockSleepMode(EM2);
+				tx_count =0;													// Reset the tx count
+				tx_flag = false;												// No more transmission
+				LEUART0->IEN &= ~LEUART_IEN_TXC;
+				LEUART0->IFC |= LEUART_IFC_TXC;									// Clear the TXC
+				if(EnergyMode == EM3)
+					unblockSleepMode(EM2);										// Unblock the sleep mode EM2
 			}
 		}
+		//LEUART0->IFC |= LEUART_IFC_TXC;
 	}
 
-	else if(LEUART0->IF & LEUART_IF_RXDATAV)
-	{
-		LEUART0->IFC |=LEUART_IF_RXDATAV;
-		leuart_rx_buffer[rx_count] = LEUART0->RXDATA;
-		rx_count++;
-		if(rx_count == 8)
-			rx_count = 0;
-	}
-
-	INT_Enable();*/
-	INT_Disable();
-		uint32_t int_flag = LEUART_IntGet(LEUART0);
-		LEUART_IntClear(LEUART0,int_flag);
-		if((tx_count < LEUART_TX_SIZE) && (tx_flag))
-		{
-			LEUART0->TXDATA = leuart_buffer[tx_count];
-			tx_count++;
-			if (tx_count == LEUART_TX_SIZE)
-			{
-				tx_count =1;
-				tx_flag = false;
-
-				unblockSleepMode(EM2);
-			}
-		}
 	INT_Enable();
 }
 
@@ -111,6 +97,12 @@ void dmaconfig_LEUART(void)
 
 */
 
+/*
+ * Description: Initializes the LEUART0 on location 0. It also initializes the LEUART pins //
+ * Args: None
+ * Return: Nones
+ */
+
 void leuart_initialize(void)
 {
 
@@ -129,10 +121,8 @@ void leuart_initialize(void)
 	LEUART0->ROUTE |= LEUART_ROUTE_LOCATION_LOC0;								// Route the GPIO locations
 	LEUART0->ROUTE |= LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN;					// Route the GPIO Pins
 
-//	LEUART0->CTRL|= LEUART_CTRL_LOOPBK;
 	leuart_pin_initialize();													// Initialize the LEUART GPIO Pins//
-	LEUART0->IEN   |= LEUART_IEN_TXC;
-	//LEUART0->IEN   |= LEUART_IEN_RXDATAV;
+	//LEUART0->IEN   |= LEUART_IEN_TXC;											// Enable the LEUART Tx Complete interrupts
 	NVIC_ClearPendingIRQ(LEUART0_IRQn);
 	NVIC_EnableIRQ(LEUART0_IRQn);
 }
@@ -140,8 +130,15 @@ void leuart_initialize(void)
 
 void leuart_tx(uint8_t* data)
 {
+	//if(EnergyMode == EM3)
 	//while (!(CMU->STATUS & CMU_STATUS_LFXORDY));
-	LEUART_Tx(LEUART0,data[0]);
-	tx_flag = true;
+	//LEUART0->IEN |=LEUART_IEN_TXBL;
+	//LEUART0->TXDATA = data[0];
+	//while(!(LEUART0->IF & LEUART_IF_TXC));
+	//LEUART0->IFC |= LEUART_IFC_TXC;
+
+
+	//LEUART0->IEN |=LEUART_IEN_TXBL;
+	//tx_flag = true;
 }
 

@@ -9,6 +9,7 @@
 #define LEUART_H_
 
 #include "main.h"
+#include "sleep.h"
 
 #define LEUART_TX_PORT		gpioPortD
 #define LEUART_TX_PIN		4
@@ -24,7 +25,7 @@
 #define LEUART_STOP_BITS	leuartStopbits1
 #define LEUART_ENABLE_RxTx	leuartEnable
 
-#define LEUART_TX_SIZE		8
+#define LEUART_TX_SIZE		6
 
 
 

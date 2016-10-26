@@ -51,7 +51,7 @@
 #define ADC_TEMP_CHANNEL			adcSingleInputTemp			// Using Temperature sensor as ADC input channel
 #define ADC_SINGLE_CONVERSION       adcStartSingle
 #define ADC_RESOLUTION 				adcRes12Bit
-#define ADC_ACQUSITION_TIME			adcAcqTime8
+#define ADC_ACQUSITION_TIME			adcAcqTime2
 #define ADC_WARMUP					adcWarmupNormal
 #define ADC_REFERENCE_LEVEL			adcRef1V25
 #define prescale10ksps				10							//Tksps = (Ta + N)*OSR, TA = Acquisition Time, N= ADC_Bits, OSR = OverSamplingRatio

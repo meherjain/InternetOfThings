@@ -74,6 +74,7 @@ src/main.o: ../src/main.c \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_i2c.h \
  C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/i2c.h \
  C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/leuart.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h \
  C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/main.h
 
 C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h:
@@ -225,5 +226,7 @@ C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_i2c.h:
 C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/i2c.h:
 
 C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/leuart.h:
+
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h:
 
 C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/main.h:

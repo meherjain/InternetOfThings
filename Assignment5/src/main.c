@@ -12,7 +12,7 @@
 #include "main.h"
 
 
-//bool  tx_flag = false;
+
 /********************************************Declaring the global constants ***************************/
 uint32_t ACMP_OUT             = 0;										// ACMP Output //
 uint32_t LETIMER_COMP0        = 0;										// LETIMERE_COMP0 Register Value */
@@ -28,8 +28,8 @@ uint32_t Calibrated_ULFRCO    = 0;
 volatile int16_t BufferAdcData[ADC_SAMPLES];							// Global Variable for DMA to store data
 DMA_CB_TypeDef callback[DMA_CHANNEL_NO];     							// DMA Callback Descriptors
 uint16_t adcCount_DMA_OFF	  = ADC_SAMPLES;							// ADC Counts for Interrupt handler
-unsigned char leuart_buffer[8] = {0};
-static uint8_t tx_count = 1;
+unsigned char leuart_buffer[LEUART_TX_SIZE] = {0};
+
 
 
 //uint8_t ack_count =0;
@@ -131,17 +131,13 @@ void transferComplete(unsigned int channel, bool primary, void *user)
 	{
 		GPIO_PinOutSet(LED,LED1);																// LED ON if outside the range
 	}
+
 	leuart_buffer[0] =	TEMP_SENSOR;															// Temperature Header in leuart_buffer
-	snprintf((leuart_buffer+1),LEUART_TX_SIZE,"%f",averageTemp);								// Converting float to string to put in leaurt_buffer
-	blockSleepMode(EM2);
-	while (!(CMU->STATUS & CMU_STATUS_LFXORDY));
-	//CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);								    // Selecting the LFB clock tree
-	//CMU_ClockEnable(cmuClock_LFB, true);
-	//LEUART0->TXDATA = leuart_buffer[0];
-	//tx_flag = true;
+	snprintf((leuart_buffer+1),LEUART_TX_SIZE, "%f", averageTemp);								// Converting float to string to put in leaurt_buffer
+	if(EnergyMode == EM3)
+		blockSleepMode(EM2);
 
-
-	leuart_tx(leuart_buffer);																	// LEUART Transmission
+	LEUART0->IEN |=LEUART_IEN_TXBL;																// Enable the LEUART TXBL interrupt
 
 }
 
@@ -178,8 +174,10 @@ void  GPIO_ODD_IRQHandler(void)
 		for (i=2;i<LEUART_TX_SIZE;i++)											// Padding the rest of the bytes to maintain the buffer size
 			leuart_buffer[i] = PADDING;
 
-		//blockSleepMode(EM2);
-		//leuart_tx(leuart_buffer);												// LEUART Transmission //
+		if (EnergyMode == EM3)
+			blockSleepMode(EM2);
+
+		LEUART0->IEN |=LEUART_IEN_TXBL;												// Enable the LEUART TXBL interrupt
 	}
 	else if (sensor_value > TSL2561_HIGH_THRESHOLD)
 	{
@@ -188,8 +186,10 @@ void  GPIO_ODD_IRQHandler(void)
 		for (i=2;i<LEUART_TX_SIZE;i++)										    // Padding the rest of the bytes to maintain the buffer size
 			leuart_buffer[i] = PADDING;
 
-		//blockSleepMode(EM2);
-		//leuart_tx(leuart_buffer);												 // LEUART Transmission //
+		if (EnergyMode == EM3)
+			blockSleepMode(EM2);
+
+		LEUART0->IEN |=LEUART_IEN_TXBL;											// Enable the LEUART TXBL interrupt
 	}
 
 	INT_Enable();																// Enable the interrupt
@@ -470,8 +470,8 @@ void clock_init(sleepstate_enum EMx)
 	{
 		CMU_OscillatorEnable(cmuOsc_LFXO,true,true);										// Enable the LFXO oscillator for EM2
 		CMU_ClockSelectSet(cmuClock_LFA,cmuSelect_LFXO);									// Selecting the LFA clock tree
-		CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);								    // Selecting the LFB clock tree
-		CMU_ClockEnable(cmuClock_LFB, true);
+		//CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);								    // Selecting the LFB clock tree
+		//CMU_ClockEnable(cmuClock_LFB, true);
 
 	}
 	else if (EMx == EM3)																	// Check the current energy mode
@@ -484,6 +484,8 @@ void clock_init(sleepstate_enum EMx)
 
 	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);								    // Selecting the LFB clock tree
 	CMU_ClockEnable(cmuClock_LFB, true);
+	//CMU->CTRL &=~CMU_CTRL_LFXOTIMEOUT_32KCYCLES;
+	//CMU->CTRL |=CMU_CTRL_LFXOTIMEOUT_16KCYCLES;
 
 }
 
@@ -789,8 +791,8 @@ void dmaConfig_ADC(void)
 	chnlCfg.select       = DMAREQ_ADC0_SINGLE;										// ADC channel as a source for DMA signals
 	DMA_CfgChannel(DMA_CHANNEL_ADC, &chnlCfg);										// Configuration of DMA channels
 
-	descrCfg.arbRate	 = 1;														// No arbritration, since, ADC is only peripheral using DMA
-	descrCfg.dstInc		 = dmaDataInc2;												// 2 bytes of address increment at destination (12 bit ADC)
+	descrCfg.arbRate	 = 0;													    // No arbritration, since, ADC is only peripheral using DMA
+	descrCfg.dstInc		 = dmaDataInc2;											 	// 2 bytes of address increment at destination (12 bit ADC)
 	descrCfg.srcInc		 = dmaDataIncNone;											// No address increment at source (ADC buffer)
 	descrCfg.size        = dmaDataSize2;											// 2 bytes of data transfer
 	descrCfg.hprot		 = 0;
@@ -823,7 +825,6 @@ int main(void)
 #if defined(INTERNAL_SENSOR_ON)
   ACMPInit(EnergyMode);												// Initializing the ACMP
 #endif
-  //clock_init(EnergyMode);							 				// Initializing the Oscillators and Clock trees
   letimer_initialize(EnergyMode);									// Initializing the LETIMER0
 
 

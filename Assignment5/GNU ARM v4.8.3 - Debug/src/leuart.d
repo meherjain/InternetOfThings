@@ -73,7 +73,9 @@ src/leuart.o: ../src/leuart.c \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/kits/common/drivers/dmactrl.h \
  C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_i2c.h \
  C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/i2c.h \
- C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/leuart.h
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/leuart.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h \
+ C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h
 
 C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/leuart.h:
 
@@ -224,3 +226,7 @@ C:/SiliconLabs/SimplicityStudio/v3/developer/sdks/efm32/v2/emlib/inc/em_i2c.h:
 C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/i2c.h:
 
 C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/leuart.h:
+
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h:
+
+C:/Users/Meher/SimplicityStudio/v3_workspace/Assignment5/inc/sleep.h:

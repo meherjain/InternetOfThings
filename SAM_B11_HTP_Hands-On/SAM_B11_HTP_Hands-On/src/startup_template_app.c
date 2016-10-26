@@ -70,7 +70,7 @@ volatile bool Temp_Notification_Flag = false;
 
 /* UART Declaration */
 struct uart_module uart_instance1;
-#define BUFFER_LEN    6
+#define BUFFER_LEN    6								// DMA Call Back after 6 bytes
 static uint8_t string[BUFFER_LEN+1];
 
 /*Temperature Buffer */
@@ -90,31 +90,44 @@ static void transfer_done_tx(struct dma_resource* const resource )
 	dma_start_transfer_job(&uart_dma_resource_tx);
 }
 
+
+
+/* Added By Meher Jain 
+	for Assingment 5
+	Call back for DMA RX Complete
+	Receives the Command from Leopard Gecko over UART.
+	
+	Command Details:
+	Size: 6 Bytes
+	Header: 1 Byte. 
+	'T' for temperature command, Rest 5 bytes for temperature value 
+	'L' for Light Command, ext byte '0' for LED ON, 'F' for LED OFF, 4 bytes padded to make size consistent	 
+*/
 static void transfer_done_rx(struct dma_resource* const resource )
-{
-	dma_start_transfer_job(&uart_dma_resource_rx);
-	int i=0;
-	uint8_t temp_buffer[BUFFER_LEN+1];
-	strcpy(temp_buffer,string);
-	memset(string,0,sizeof(string));
+{	
+	dma_start_transfer_job(&uart_dma_resource_rx);											// Restart the DMA transfer
+	int i=0;	
+	uint8_t temp_buffer[BUFFER_LEN+1];													
+	strcpy(temp_buffer,string);																// Copy DMA buffer to local buffer
+	memset(string,0,sizeof(string));														// Reset the DMA Buffer
 	printf("\n");
 	//printf("MJ: %s", temp_buffer);
-	for(i=0;i<8;i++)
+	for(i=0;i<BUFFER_LEN;i++)
  		printf("%c",temp_buffer[i]);
-	printf("\n");
-	temp_buffer[BUFFER_LEN] = '\0';
-	if(temp_buffer[0] == LIGHT_SENSOR)
+	//printf("\n");
+	temp_buffer[BUFFER_LEN] = '\0';															// NULL terminate for string functions to work
+	if(temp_buffer[0] == LIGHT_SENSOR)														// IF light command
 	{
 		if(temp_buffer[1] == LEDON)
-			gpio_pin_set_output_level(LED_0_PIN,LED_ON);
+			gpio_pin_set_output_level(LED_0_PIN,LED_ON);									// Turn ON LED if ON in leopard gecko
 					
 		else if(temp_buffer[1] == LEDOFF)
-			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);		
+			gpio_pin_set_output_level(LED_0_PIN,LED_OFF);									// Turn OFF LED if OFF in leopard gecko
 	}	
-	else if(temp_buffer[0] == TEMP_SENSOR)
+	else if(temp_buffer[0] == TEMP_SENSOR)													// If temperature Data
 	{
-		strcpy(temperature_buffer,(temp_buffer+1));
-		//printf("Temp:");
+		strcpy(temperature_buffer,(temp_buffer+1));											// Copy in temperature buffer
+		//printf("Temp:");	
 		//for(i=0;i<8;i++)
 			//printf("%c",temp_buffer[i]);
 	}
