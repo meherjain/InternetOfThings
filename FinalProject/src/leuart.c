@@ -9,7 +9,7 @@
 #include "leuart.h"
 #include "sleep.h"
 
-static uint8_t tx_count = 0;
+//static uint8_t tx_count = 0;
 extern uint8_t leuart_buffer[];
 extern circBuff circbuff_t;
 extern DMA_CB_TypeDef callback[];

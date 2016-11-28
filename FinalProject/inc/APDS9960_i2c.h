@@ -145,6 +145,13 @@
 #define GWTIME_30_8MS           6
 #define GWTIME_39_2MS           7
 
+/* Gesture parameters */
+#define GESTURE_THRESHOLD_OUT   10
+#define GESTURE_SENSITIVITY_1   50
+#define GESTURE_SENSITIVITY_2   20
+
+
+
 /* Default Values */
 #define DEFAULT_ATIME           219     // 103ms
 #define DEFAULT_WTIME			246				// 27ms
@@ -163,21 +170,21 @@
 #define DEFAULT_GPENTH			40		// Threshold for Entering Gesture Mode
 #define DEFAULT_GEXTH			30		// Threshold for Exiting Gesture Mode
 #define DEFAULT_GCONF1			0x40    // 4 Gesture events
-#define DEFAULT_GGAIN			GGAIN_4x
+#define DEFAULT_GGAIN			GGAIN_4X
 #define DEFAULT_GLDRIVE			LED_DRIVE_100MA
 #define DEFAULT_GWTIME			GWTIME_2_8MS
 #define DEFAULT_GOFFSET			0 		// No Offset Scaling
 #define DEFAULT_GPULSE			0xC9	// 32us 10 pulses
 #define DEFAULT_GCONF3			0		// All photodiodes active during gesture
 #define DEFAULT_GIEN			0		// Disable Gesture Interrupts
-
+#define DEFAULT_GESTURE_PPULSE  0x89	// 16us 10 Pulses
 
 /* I2C Specific Declaration */
 #define	I2C_BUFFER_SIZE					1
 #define I2C_DELAY						10000
 #define I2C_SHORT_DELAY					1000
 
-
+#define ERROR							0xFF
 
 #define RESET_I2C_BUS()					do { \
 											if (I2C1->STATE & I2C_STATE_BUSY){ \
@@ -203,10 +210,70 @@ uint8_t APDS9960_Proximity_Read(void);
 void APDS9960_Proximity_Enable(bool);
 void APDS9960_Proximity_Threshold(uint8_t,uint8_t);
 void APDS9960_Init(void);
-void APDS9960_Proximity_Start(void);
+void APDS9960_Proximity_Start(bool);
+
 
 
 /* Gesture Declaration */
+void APDS9960_Gesture_Threshold(uint8_t, uint8_t);
+void APDS9960_setGestureGain(uint8_t);
+void APDS9960_setGestureLEDDrive(uint8_t);
+void APDS9960_setGestureWaitTime(uint8_t);
+void APDS9960_setGestureInterrupts(uint8_t);
+void APDS9960_setLEDBoost(uint8_t);
+void APDS9960_SetGestureMode(uint8_t);
+void resetGestureParameters(void);
+void ADPS9960_Gesture_Enable(bool);
+void APDS9960_Gesture_Start(bool);
+bool APDS9960_isGestureAvailable(void);
+int APDS9960_readGesture(void);
+bool APDS9960_processGestureData(void);
+bool APDS9960_decodeGesture(void);
+
+
+/* State definitions */
+enum {
+  NA_STATE,
+  NEAR_STATE,
+  FAR_STATE,
+  ALL_STATE
+};
+
+
+/* Direction definitions */
+enum {
+	DIR_NONE,
+	DIR_LEFT,
+	DIR_RIGHT,
+	DIR_UP,
+	DIR_DOWN,
+	DIR_NEAR,
+	DIR_FAR,
+	DIR_ALL
+};
+
+
+typedef struct {
+	uint8_t u_data[32];
+	uint8_t d_data[32];
+	uint8_t l_data[32];
+	uint8_t r_data[32];
+	uint8_t index;
+	uint8_t total_gestures;
+	uint8_t in_threshold;
+	uint8_t out_threshold;
+    int ud_delta_;
+	int lr_delta_;
+	int ud_count_;
+	int lr_count_;
+	int near_count_;
+	int far_count_;
+	int state_;
+	int motion_;
+}gesture_data_type;
+
+gesture_data_type gesture_data;
+
 
 
 

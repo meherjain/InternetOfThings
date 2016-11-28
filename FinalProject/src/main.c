@@ -173,52 +173,44 @@ void transferComplete(unsigned int channel, bool primary, void *user)
 
 void  GPIO_ODD_IRQHandler(void)
 {
-	uint8_t sensor_value,temp_value;
+	uint8_t value ;
+	int gesture_direction;
 	INT_Disable();																// Disable the interrupts//
 	GPIO_IntClear(GPIO_IntGet());												// Get and Clear the GPIO Interrupt
 
-	sensor_value = APDS9960_Proximity_Read();
-	leuart_buffer[0] = PROX_SENSOR;
-	if (sensor_value >99)
-		sensor_value =99;
-	snprintf((leuart_buffer+1),LEUART_TX_SIZE,"%d",sensor_value);
-	circBufferPush(&circbuff_t,leuart_buffer,LEUART_TX_SIZE);
+	//value = APDS9960_Proximity_Read();
 
-	if(EnergyMode == EM3)
-		blockSleepMode(EM2);
-
-#if defined (DMA_ON_LEUART)
-
-	dmaControlBlock->SRCEND = leuart_buffer + LEUART_TX_SIZE -1;
-	LEUART0->CTRL |= LEUART_CTRL_TXDMAWU;
-
-	DMA_ActivateBasic(DMA_CHANNEL_TX_LEUART,															// Activate the DMA to start transfer
-				                    true,
-				                    false,
-				                    NULL,
-				                    NULL,
-				                    LEUART_TX_SIZE - 1);
-
-#else
-	LEUART0->IEN |=LEUART_IEN_TXBL;
-#endif
-
-	I2C_CommandWrite(APDS9960_PRO_INT_CLEAR);
-
-
-/*
-	if(interrupt_flag)
+	value = APDS9960_isGestureAvailable();
+	if(value)
 	{
-		interrupt_flag =true;
-		NVIC_DisableIRQ(GPIO_ODD_IRQn);
-		GPIO_PinModeSet(GPIO_INT_PORT,GPIO_INT_PIN,gpioModeDisabled,0);
-		GPIO_PinOutClear(GPIO_INT_PORT,GPIO_INT_PIN);
+		gesture_direction = APDS9960_readGesture();
+		switch(gesture_direction)
+		{
+			case DIR_UP:
+				SegmentLCD_Write("UP");
+				break;
+			case DIR_DOWN:
+				SegmentLCD_Write("DOWN");
+				break;
+			case DIR_LEFT:
+				SegmentLCD_Write("LEFT");
+				break;
+			case DIR_RIGHT:
+				SegmentLCD_Write("RIGHT");
+				break;
+			case DIR_NEAR:
+				SegmentLCD_Write("NEAR");
+				break;
+			case DIR_FAR:
+				SegmentLCD_Write("FAR");
+				break;
+			default:
+				SegmentLCD_Write("NONE");
+		}
 	}
-*/
+
+	//I2C_CommandWrite(APDS9960_PRO_INT_CLEAR);
 	INT_Enable();																// Enable the interrupt
-
-
-
 }
 
 
@@ -411,26 +403,23 @@ void LETIMER0_IRQHandler(void)
 		if (counter_flag == 0)
 		{
 
-
+			i2c_read_val = APDS9960_Proximity_Read();
+			SegmentLCD_Number(i2c_read_val);
 			counter_flag ++;																		// Increment the counter_flag
 		}
 
 		else if (counter_flag == 1)
 		{
 
-			GPIO_PinModeSet(GPIO_INT_PORT,GPIO_INT_PIN,gpioModeInput,0);
-			GPIO_PinOutSet(GPIO_INT_PORT,GPIO_INT_PIN);
-			NVIC_EnableIRQ(GPIO_ODD_IRQn);															// Enable the GPIO Interrupt
+			i2c_read_val = APDS9960_Proximity_Read();
+			SegmentLCD_Number(i2c_read_val);
 			counter_flag ++;
 		}
 
 		else if (counter_flag == 2)
 		{
-
-			NVIC_DisableIRQ(GPIO_ODD_IRQn);
-			GPIO_PinModeSet(GPIO_INT_PORT,GPIO_INT_PIN,gpioModeDisabled,0);
-			GPIO_PinOutClear(GPIO_INT_PORT,GPIO_INT_PIN);
-																								// Turn of the GPIO Interrupt/
+			i2c_read_val = APDS9960_Proximity_Read();
+			SegmentLCD_Number(i2c_read_val);
 			counter_flag = 0;																		// Reset the counter flag
 
 		}
@@ -949,11 +938,11 @@ int main(void)
 
   CHIP_Init();
   blockSleepMode(EM3);												// Block EM4, so that processor never goes below EM3
-  CAPLESENSE_Init(true);
-  passwordCheck();
-  disableLESENSE();
+  //CAPLESENSE_Init(true);
+  //passwordCheck();
+  //disableLESENSE();
 
-
+	SegmentLCD_Init(vboost);
 #if defined(CALIBRATION)											// If calibration on
   LETIMER_Calibration();											// Calibrate the ULFRCO
 #endif
@@ -970,7 +959,10 @@ int main(void)
 #endif
   dmaconfig_LEUART();
   I2C_Initialize();													// Initialize the I2C1
-  APDS9960_Proximity_Start();
+  APDS9960_Init();
+  APDS9960_Gesture_Start(true);
+  //APDS9960_Proximity_Start(true);
+
 
   letimer_initialize(EnergyMode);									// Initializing the LETIMER0
 

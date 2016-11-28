@@ -11,6 +11,7 @@
 // Include Header Files
 #include "stdio.h"
 #include "stdbool.h"
+#include "stdlib.h"
 #include "em_device.h"
 #include "em_chip.h"
 #include "em_int.h"
@@ -34,6 +35,7 @@
 #include "caplesenseconfig.h"
 #include "APDS9960_i2c.h"
 #include "malloc.h"
+
 
 
 
